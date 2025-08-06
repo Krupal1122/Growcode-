@@ -198,6 +198,7 @@ const BlogPage = () => {
 };
 
 // Updated BlogDetail Component
+// Updated BlogDetail Component
 const BlogDetail = ({ blog }) => {
   // Derive content from sections
   const content = blog.sections
@@ -209,7 +210,7 @@ const BlogDetail = ({ blog }) => {
     })
     .join("\n\n");
 
-  // Static reading time (can be calculated based on content length if desired)
+  // Static reading time
   const readingTime = "~ 6 minutes";
 
   return (
@@ -220,12 +221,12 @@ const BlogDetail = ({ blog }) => {
             <p className="text-gray-500 text-sm">Contributor</p>
             <div className="flex items-center mt-2">
               <img
-                src="https://via.placeholder.com/40" // Placeholder for author image
+                src="https://via.placeholder.com/40"
                 alt="Contributor"
                 className="w-10 h-10 rounded-full mr-2"
               />
               <div>
-                <p className="text-gray-800 font-medium">Unknown</p> {/* Replace with actual author if added to schema */}
+                <p className="text-gray-800 font-medium">Unknown</p>
                 <p className="text-gray-500 text-sm">{blog.date}</p>
               </div>
             </div>
@@ -244,21 +245,30 @@ const BlogDetail = ({ blog }) => {
             <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-50"></div>
             <div className="absolute bottom-4 left-4">
               <img
-                src="https://via.placeholder.com/100" // Placeholder for logo
+                src="https://via.placeholder.com/100"
                 alt="Company Logo"
                 className="w-24 h-auto"
               />
             </div>
           </div>
           <div className="text-gray-600">
-            {/* <h2 className="text-2xl font-semibold text-gray-800 mb-4">Overview</h2>
+            <h2 className="text-2xl font-semibold text-gray-800 mb-4">Overview</h2>
             <p className="mb-4">
-              This section provides details based on the form data submitted. Explore the questions and answers provided in the form.
-            </p> */}
+              This section provides details based on the form data submitted. Explore the questions and answers below.
+            </p>
             <h3 className="text-xl font-semibold text-gray-700 mt-6">Table of Contents</h3>
             <ul className="list-disc pl-5 mt-2 text-gray-600">
               {blog.sections.map((section, index) => (
-                <li key={index}>{section.subheading || `Section ${index + 1}`}</li>
+                <li key={index}>
+                  {section.subheading || `Section ${index + 1}`}
+                  {section.questions.length > 0 && (
+                    <ul className="list-circle pl-5 mt-1">
+                      {section.questions.map((question, qIndex) => (
+                        <li key={qIndex}>{question.questionText}</li>
+                      ))}
+                    </ul>
+                  )}
+                </li>
               ))}
             </ul>
             <div className="mt-6">

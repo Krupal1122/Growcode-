@@ -112,20 +112,27 @@ export default function APIInputTable() {
       alert('Please enter a form title');
       return;
     }
+    if (!imageUrl) {
+      alert('Please upload an image');
+      return;
+    }
 
     try {
       const payload = {
-        ...formData,
+        title: formData.title,
         image: imageUrl,
+        sections: formData.sections,
       };
-      const response = await axios.post('http://localhost:5000/api/forms', payload);
+      const response = await axios.post('http://localhost:5000/api/forms', payload, {
+        headers: { 'Content-Type': 'application/json' },
+      });
       console.log('Form submitted successfully:', response.data);
       alert('Form data saved to MongoDB!');
       setFormData({ title: '', sections: [] });
       setSelectedImage(null);
       setImageUrl(null);
     } catch (error) {
-      console.error('Error submitting form:', error);
+      console.error('Error submitting form:', error.response ? error.response.data : error.message);
       alert('Error saving form data');
     }
   };
@@ -171,11 +178,20 @@ export default function APIInputTable() {
               <div key={questionIndex} className="border p-2 rounded space-y-2 bg-gray-50">
                 <input
                   type="text"
-                  className="w-full border p-1 rounded"
+                  className="w-full border p-1 rounded mb-2"
                   placeholder="Enter question text"
                   value={question.questionText}
                   onChange={(e) =>
                     updateQuestion(sectionIndex, questionIndex, 'questionText', e.target.value)
+                  }
+                />
+                <input
+                  type="text"
+                  className="w-full border p-1 rounded"
+                  placeholder="Enter answer text (optional)"
+                  value={question.answerText}
+                  onChange={(e) =>
+                    updateQuestion(sectionIndex, questionIndex, 'answerText', e.target.value)
                   }
                 />
                 <button
