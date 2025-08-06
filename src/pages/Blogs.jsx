@@ -117,7 +117,7 @@ const BlogPage = () => {
         </div>
       ) : (
         <div
-          className="max-w-screen-xl mx-auto mb-12 p-6 bg-white rounded-lg shadow-md flex items-center border border-gray-200 cursor-pointer hover:shadow-xl hover:-translate-y-2 hover:scale-105 transition duration-300"
+          className=" max-w-screen-xl mx-auto mb-12 p-6 bg-white rounded-lg shadow-md flex items-center border border-gray-200 cursor-pointer hover:shadow-xl hover:-translate-y-2 hover:scale-105 transition duration-300"
           onClick={() => handleCardClick(featuredBlog)}
         >
           <div className="w-1/2">
@@ -214,46 +214,48 @@ const BlogDetail = ({ blog }) => {
   return (
     <div className="">
       <div className="flex items-start mb-6">
-        <div className="w-60 pr-4">
-          <div className="bg-gray-100 p-4 rounded-lg">
-            <p className="text-gray-500 text-sm">Contributor</p>
-            <div className="flex items-center mt-2">
-              <img
-                src="https://via.placeholder.com/40"
-                alt="Contributor"
-                className="w-10 h-10 rounded-full mr-2"
-              />
-              <div>
-                <p className="text-gray-800 font-medium">Unknown</p>
-                <p className="text-gray-500 text-sm">{blog.date}</p>
-              </div>
-            </div>
-            <p className="text-gray-500 text-sm mt-4">Reading Time</p>
-            <p className="text-gray-800">{readingTime}</p>
-          </div>
-          <div className="mt-12 border-l border-r border-gray-300 px-6">
-            {blog.sections.map((section, index) => (
-              <div key={index} className="mb-4">
-                {/* Display subheading if it exists */}
-                {section.subheading && (
-                  <li className="text-lg font-semibold text-gray-800 mb-2">
-                    {section.subheading}
-                  </li>
-                )}
-                {/* Display questions if they exist */}
-                {section.questions.length > 0 && (
-                  <ul className="list-disc pl-5">
-                    {section.questions.map((question, qIndex) => (
-                      <h3 key={qIndex} className="text-gray-600 text-sm mb-1">
-                        {question.questionText}
-                      </h3>
-                    ))}
-                  </ul>
-                )}
-              </div>
+        <div className="w-60 pr-4 sticky top-6 self-start">
+  {/* Contributor Info */}
+  <div className="bg-gray-100 p-4 rounded-lg">
+    <p className="text-gray-500 text-sm">Contributor</p>
+    <div className="flex items-center mt-2">
+      <img
+        src="https://via.placeholder.com/40"
+        alt="Contributor"
+        className="w-10 h-10 rounded-full mr-2"
+      />
+      <div>
+        <p className="text-gray-800 font-medium">Unknown</p>
+        <p className="text-gray-500 text-sm">{blog.date}</p>
+      </div>
+    </div>
+    <p className="text-gray-500 text-sm mt-4">Reading Time</p>
+    <p className="text-gray-800">{readingTime}</p>
+  </div>
+
+  {/* Scrollable Section List */}
+  <div className="mt-6 border-l border-r border-gray-300 px-4 max-h-[460px] overflow-y-auto">
+    {blog.sections.map((section, index) => (
+      <div key={index} className="mb-4">
+        {section.subheading && (
+          <li className="text-base font-semibold text-gray-800 mb-2">
+            {section.subheading}
+          </li>
+        )}
+        {section.questions.length > 0 && (
+          <ul className="list-disc pl-5">
+            {section.questions.map((question, qIndex) => (
+              <h3 key={qIndex} className="text-gray-600 text-sm mb-1">
+                {question.questionText}
+              </h3>
             ))}
-          </div>
-        </div>
+          </ul>
+        )}
+      </div>
+    ))}
+  </div>
+</div>
+
 
         <div className="w-3/4">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">{blog.title}</h1>
