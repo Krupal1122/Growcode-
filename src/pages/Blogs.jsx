@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import APIInputTable from "./APIInputTable"; // Assuming APIInputTable is in the same directory
 
@@ -177,9 +177,6 @@ const BlogPage = () => {
         )}
       </div>
 
-
-
-
       {/* Blog Detail Modal */}
       {selectedBlog && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -206,58 +203,131 @@ const BlogPage = () => {
   );
 };
 
-// BlogDetail Component (Unchanged)
+// BlogDetail Component with Scroll Highlighting for Single Active Element
 const BlogDetail = ({ blog }) => {
-  // Static reading time
-  const readingTime = "~ 6 minutes";
+  const [activeElement, setActiveElement] = useState(null); // State to track active element (subheading or question)
+  const contentRef = useRef(null); // Ref for the right-side content
+  const readingTime = " ";
+
+  // Scroll handler to detect the topmost element (subheading or question)
+  useEffect(() => {
+    const handleScroll = () => {
+      const sectionElements = document.querySelectorAll(".section-heading");
+      const questionElements = document.querySelectorAll(".question-heading");
+      let topElement = null;
+
+      // Check sections
+      sectionElements.forEach((section, index) => {
+        const rect = section.getBoundingClientRect();
+        if (rect.top <= 100 && rect.top >= -rect.height) {
+          topElement = {
+            type: "section",
+            value: blog.sections[index].subheading || `Section ${index + 1}`,
+          };
+        }
+      });
+
+      // Check questions (override section if a question is closer to the top)
+      questionElements.forEach((question, qIndex) => {
+        const rect = question.getBoundingClientRect();
+        if (rect.top <= 100 && rect.top >= -rect.height) {
+          let questionCount = 0;
+          for (let i = 0; i < blog.sections.length; i++) {
+            const questions = blog.sections[i].questions;
+            for (let j = 0; j < questions.length; j++) {
+              if (questionCount === qIndex) {
+                topElement = {
+                  type: "question",
+                  value: questions[j].questionText,
+                };
+                return;
+              }
+              questionCount++;
+            }
+          }
+        }
+      });
+
+      // Set the active element only if we found one
+      setActiveElement(topElement);
+    };
+
+    const contentElement = contentRef.current;
+    if (contentElement) {
+      contentElement.addEventListener("scroll", handleScroll);
+    }
+
+    return () => {
+      if (contentElement) {
+        contentElement.removeEventListener("scroll", handleScroll);
+      }
+    };
+  }, [blog.sections]);
 
   return (
     <div className="">
       <div className="flex items-start mb-6">
         <div className="w-60 pr-4 sticky top-6 self-start">
-  {/* Contributor Info */}
-  <div className="bg-gray-100 p-4 rounded-lg">
-    <p className="text-gray-500 text-sm">Contributor</p>
-    <div className="flex items-center mt-2">
-      <img
-        src="https://via.placeholder.com/40"
-        alt="Contributor"
-        className="w-10 h-10 rounded-full mr-2"
-      />
-      <div>
-        <p className="text-gray-800 font-medium">Unknown</p>
-        <p className="text-gray-500 text-sm">{blog.date}</p>
-      </div>
-    </div>
-    <p className="text-gray-500 text-sm mt-4">Reading Time</p>
-    <p className="text-gray-800">{readingTime}</p>
-  </div>
+          {/* Contributor Info */}
+          <div className="bg-gray-100 p-4 rounded-lg">
+            <p className="text-gray-500 text-sm">Contributor</p>
+            <div className="flex items-center mt-2">
+              <img
+                src="https://img.freepik.com/free-photo/waist-up-portrait-handsome-serious-unshaven-male-keeps-hands-together-dressed-dark-blue-shirt-has-talk-with-interlocutor-stands-against-white-wall-self-confident-man-freelancer_273609-16320.jpg"
+                alt="Contributor"
+                className="w-10 h-10 rounded-full mr-2"
+              />
+              <div>
+                <p className="text-gray-800 font-medium">Unknown</p>
+                <p className="text-gray-500 text-sm">{blog.date}</p>
+              </div>
+            </div>
+            <p className="text-gray-500 text-sm mt-4">Reading Time</p>
+            {/* <p className="text-gray-800">{readingTime}</p> */}
+          </div>
 
-  {/* Scrollable Section List */}
-  <div className="mt-6 border-l border-r border-gray-300 px-4 max-h-[460px] overflow-y-auto">
-    {blog.sections.map((section, index) => (
-      <div key={index} className="mb-4">
-        {section.subheading && (
-          <li className="text-base font-semibold text-gray-800 mb-2">
-            {section.subheading}
-          </li>
-        )}
-        {section.questions.length > 0 && (
-          <ul className="list-disc pl-5">
-            {section.questions.map((question, qIndex) => (
-              <h3 key={qIndex} className="text-gray-600 text-sm mb-1">
-                {question.questionText}
-              </h3>
+          {/* Scrollable Section List */}
+          <div className="mt-6 border-l border-r border-gray-300 px-4 max-h-[460px] overflow-y-auto">
+            {blog.sections.map((section, index) => (
+              <div key={index} className="mb-4">
+                {section.subheading && (
+                  <li
+                    className={`text-base font-semibold mb-2 ${
+                      activeElement?.type === "section" &&
+                      activeElement?.value === section.subheading
+                        ? "text-blue-600"
+                        : "text-gray-800"
+                    }`}
+                  >
+                    {section.subheading}
+                  </li>
+                )}
+                {section.questions.length > 0 && (
+                  <ul className="list-disc pl-5">
+                    {section.questions.map((question, qIndex) => (
+                      <h3
+                        key={qIndex}
+                        className={`text-sm mb-1 ${
+                          activeElement?.type === "question" &&
+                          activeElement?.value === question.questionText
+                            ? "text-blue-600"
+                            : "text-gray-600"
+                        }`}
+                      >
+                        {question.questionText}
+                      </h3>
+                    ))}
+                  </ul>
+                )}
+              </div>
             ))}
-          </ul>
-        )}
-      </div>
-    ))}
-  </div>
-</div>
+          </div>
+        </div>
 
-
-        <div className="w-3/4">
+        <div
+          className="w-3/4 max-h-[80vh] overflow-y-auto"
+          ref={contentRef}
+        >
           <h1 className="text-4xl font-bold text-gray-900 mb-4">{blog.title}</h1>
           <div className="relative mb-6">
             <img
@@ -278,12 +348,16 @@ const BlogDetail = ({ blog }) => {
             <ul className="list-disc pl-5 mt-2 text-gray-600">
               {blog.sections.map((section, index) => (
                 <li key={index}>
-                  {section.subheading || `Section ${index + 1}`}
+                  <div className="section-heading font-semibold text-gray-800 mb-2">
+                    {section.subheading || `Section ${index + 1}`}
+                  </div>
                   {section.questions.length > 0 && (
                     <ul className="list-circle pl-5 mt-1">
                       {section.questions.map((question, qIndex) => (
                         <li key={qIndex}>
-                          <div className="font-medium text-gray-800">{question.questionText}</div>
+                          <div className="question-heading font-medium text-gray-800">
+                            {question.questionText}
+                          </div>
                           <div className="text-gray-500 text-sm ml-4">{question.answerText}</div>
                         </li>
                       ))}
