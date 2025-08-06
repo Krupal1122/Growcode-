@@ -198,18 +198,7 @@ const BlogPage = () => {
 };
 
 // Updated BlogDetail Component
-// Updated BlogDetail Component
 const BlogDetail = ({ blog }) => {
-  // Derive content from sections
-  const content = blog.sections
-    .map((section) => {
-      const sectionContent = section.questions
-        .map((q) => `${q.questionText} ${q.answerText ? `- ${q.answerText}` : ""}`)
-        .join("\n");
-      return section.subheading ? `${section.subheading}\n${sectionContent}` : sectionContent;
-    })
-    .join("\n\n");
-
   // Static reading time
   const readingTime = "~ 6 minutes";
 
@@ -252,11 +241,7 @@ const BlogDetail = ({ blog }) => {
             </div>
           </div>
           <div className="text-gray-600">
-            {/* <h2 className="text-2xl font-semibold text-gray-800 mb-4">Overview</h2>
-            <p className="mb-4">
-              This section provides details based on the form data submitted. Explore the questions and answers below.
-            </p>
-            <h3 className="text-xl font-semibold text-gray-700 mt-6">Table of Contents</h3> */}
+         
             <ul className="list-disc pl-5 mt-2 text-gray-600">
               {blog.sections.map((section, index) => (
                 <li key={index}>
@@ -264,16 +249,15 @@ const BlogDetail = ({ blog }) => {
                   {section.questions.length > 0 && (
                     <ul className="list-circle pl-5 mt-1">
                       {section.questions.map((question, qIndex) => (
-                        <li key={qIndex}>{question.questionText}</li>
+                        <li key={qIndex}> <div className="font-medium text-gray-800">{question.questionText}</div>
+  <div className="text-gray-500 text-sm ml-4">{question.answerText}</div></li>
                       ))}
                     </ul>
                   )}
                 </li>
               ))}
             </ul>
-            <div className="mt-6">
-              <p>{content || "No detailed content available."}</p>
-            </div>
+            
           </div>
         </div>
       </div>
