@@ -7,6 +7,7 @@ const BlogPage = () => {
   const [blogs, setBlogs] = useState([]); // State to store API data
   const [loading, setLoading] = useState(true); // Loading state
   const [error, setError] = useState(null); // Error state
+  const [selectedBlog, setSelectedBlog] = useState(null); // State for selected blog
 
   // Toggle input table visibility
   const toggleInputTable = () => {
@@ -18,17 +19,18 @@ const BlogPage = () => {
     const fetchForms = async () => {
       try {
         const response = await axios.get("http://localhost:5000/api/forms");
-        // Map API data to match the card structure
+        // Map API data to match the card structure using actual fields
         const formattedBlogs = response.data.map((form) => ({
+          id: form._id, // Use _id as a unique identifier
           title: form.title,
-          description: form.sections[0]?.questions[0]?.questionText || "No description available", // Use first question as description or fallback
-          image: form.image || "https://via.placeholder.com/150", // Fallback image if none provided
+          description: form.sections[0]?.questions[0]?.questionText || "No description available",
+          image: form.image || "https://via.placeholder.com/150",
           date: new Date(form.createdAt).toLocaleDateString("en-US", {
             month: "long",
             day: "numeric",
             year: "numeric",
-          }), // Format date
-          author: "Form Author", // Static author or derive from form data if available
+          }),
+          sections: form.sections, // Pass sections as is for detailed view
         }));
         setBlogs(formattedBlogs);
         setLoading(false);
@@ -40,10 +42,20 @@ const BlogPage = () => {
     };
 
     fetchForms();
-  }, []); // Empty dependency array to run once on mount
+  }, []);
 
   // Select the first blog as the featured article (or apply custom logic)
-  const featuredBlog = blogs[0]; // You can modify this to select based on criteria (e.g., most recent)
+  const featuredBlog = blogs[0];
+
+  // Handle card click to show details
+  const handleCardClick = (blog) => {
+    setSelectedBlog(blog);
+  };
+
+  // Close detail view
+  const closeDetail = () => {
+    setSelectedBlog(null);
+  };
 
   return (
     <div className="bg-white py-16 px-6 text-gray-800 font-sans">
@@ -133,7 +145,8 @@ const BlogPage = () => {
           blogs.map((blog, index) => (
             <div
               key={index}
-              className="group bg-white rounded-3xl shadow-md hover:shadow-xl transition duration-300 transform hover:-translate-y-2 hover:scale-105 overflow-hidden"
+              className="group bg-white rounded-3xl shadow-md hover:shadow-xl transition duration-300 transform hover:-translate-y-2 hover:scale-105 overflow-hidden cursor-pointer"
+              onClick={() => handleCardClick(blog)}
             >
               <div className="relative">
                 <img
@@ -150,12 +163,109 @@ const BlogPage = () => {
                 </div>
                 <div className="text-gray-500 text-xs flex justify-between items-center mt-auto">
                   <span>{blog.date}</span>
-                  <span>{blog.author}</span>
+                  <span>{blog.author || "Unknown"}</span>
                 </div>
               </div>
             </div>
           ))
         )}
+      </div>
+
+      {/* Blog Detail Modal */}
+      {selectedBlog && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto p-6 relative">
+            <button
+              onClick={closeDetail}
+              className="absolute top-4 right-4 text-gray-600 hover:text-gray-800"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+            <BlogDetail blog={selectedBlog} />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Updated BlogDetail Component
+const BlogDetail = ({ blog }) => {
+  // Derive content from sections
+  const content = blog.sections
+    .map((section) => {
+      const sectionContent = section.questions
+        .map((q) => `${q.questionText} ${q.answerText ? `- ${q.answerText}` : ""}`)
+        .join("\n");
+      return section.subheading ? `${section.subheading}\n${sectionContent}` : sectionContent;
+    })
+    .join("\n\n");
+
+  // Static reading time (can be calculated based on content length if desired)
+  const readingTime = "~ 6 minutes";
+
+  return (
+    <div className="p-6">
+      <div className="flex items-start mb-6">
+        <div className="w-1/4 pr-4">
+          <div className="bg-gray-100 p-4 rounded-lg">
+            <p className="text-gray-500 text-sm">Contributor</p>
+            <div className="flex items-center mt-2">
+              <img
+                src="https://via.placeholder.com/40" // Placeholder for author image
+                alt="Contributor"
+                className="w-10 h-10 rounded-full mr-2"
+              />
+              <div>
+                <p className="text-gray-800 font-medium">Unknown</p> {/* Replace with actual author if added to schema */}
+                <p className="text-gray-500 text-sm">{blog.date}</p>
+              </div>
+            </div>
+            <p className="text-gray-500 text-sm mt-4">Reading Time</p>
+            <p className="text-gray-800">{readingTime}</p>
+          </div>
+        </div>
+        <div className="w-3/4">
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">{blog.title}</h1>
+          <div className="relative mb-6">
+            <img
+              src={blog.image}
+              alt={blog.title}
+              className="w-full h-64 object-cover rounded-lg"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-50"></div>
+            <div className="absolute bottom-4 left-4">
+              <img
+                src="https://via.placeholder.com/100" // Placeholder for logo
+                alt="Company Logo"
+                className="w-24 h-auto"
+              />
+            </div>
+          </div>
+          <div className="text-gray-600">
+            {/* <h2 className="text-2xl font-semibold text-gray-800 mb-4">Overview</h2>
+            <p className="mb-4">
+              This section provides details based on the form data submitted. Explore the questions and answers provided in the form.
+            </p> */}
+            <h3 className="text-xl font-semibold text-gray-700 mt-6">Table of Contents</h3>
+            <ul className="list-disc pl-5 mt-2 text-gray-600">
+              {blog.sections.map((section, index) => (
+                <li key={index}>{section.subheading || `Section ${index + 1}`}</li>
+              ))}
+            </ul>
+            <div className="mt-6">
+              <p>{content || "No detailed content available."}</p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
