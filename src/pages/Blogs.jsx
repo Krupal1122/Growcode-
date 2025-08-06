@@ -116,7 +116,10 @@ const BlogPage = () => {
           <p className="text-center text-gray-600 w-full">No featured article available.</p>
         </div>
       ) : (
-        <div className="max-w-screen-xl mx-auto mb-12 p-6 bg-white rounded-lg shadow-md flex items-center border border-gray-200">
+        <div
+          className="max-w-screen-xl mx-auto mb-12 p-6 bg-white rounded-lg shadow-md flex items-center border border-gray-200 cursor-pointer hover:shadow-xl hover:-translate-y-2 hover:scale-105 transition duration-300"
+          onClick={() => handleCardClick(featuredBlog)}
+        >
           <div className="w-1/2">
             <img
               src={featuredBlog.image}
@@ -197,7 +200,7 @@ const BlogPage = () => {
   );
 };
 
-// Updated BlogDetail Component
+// BlogDetail Component (Unchanged)
 const BlogDetail = ({ blog }) => {
   // Static reading time
   const readingTime = "~ 6 minutes";
@@ -241,7 +244,6 @@ const BlogDetail = ({ blog }) => {
             </div>
           </div>
           <div className="text-gray-600">
-         
             <ul className="list-disc pl-5 mt-2 text-gray-600">
               {blog.sections.map((section, index) => (
                 <li key={index}>
@@ -249,15 +251,16 @@ const BlogDetail = ({ blog }) => {
                   {section.questions.length > 0 && (
                     <ul className="list-circle pl-5 mt-1">
                       {section.questions.map((question, qIndex) => (
-                        <li key={qIndex}> <div className="font-medium text-gray-800">{question.questionText}</div>
-  <div className="text-gray-500 text-sm ml-4">{question.answerText}</div></li>
+                        <li key={qIndex}>
+                          <div className="font-medium text-gray-800">{question.questionText}</div>
+                          <div className="text-gray-500 text-sm ml-4">{question.answerText}</div>
+                        </li>
                       ))}
                     </ul>
                   )}
                 </li>
               ))}
             </ul>
-            
           </div>
         </div>
       </div>
