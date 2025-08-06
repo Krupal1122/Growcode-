@@ -137,7 +137,7 @@ const BlogPage = () => {
       )}
 
       {/* Dynamic Blog Cards */}
-      <div className="max-w-screen-xl mx-auto grid gap-12 sm:grid-cols-2 lg:grid-cols-3 px-4">
+      <div className="max-w-screen-xl mx-auto grid gap-10 sm:grid-cols-2 lg:grid-cols-3 px-4">
         {loading ? (
           <p className="text-center text-gray-600">Loading...</p>
         ) : error ? (
@@ -148,21 +148,24 @@ const BlogPage = () => {
           blogs.map((blog, index) => (
             <div
               key={index}
-              className="group bg-white rounded-3xl shadow-md hover:shadow-xl transition duration-300 transform hover:-translate-y-2 hover:scale-105 overflow-hidden cursor-pointer"
+              className="h-[380px] group bg-white rounded-3xl shadow-md hover:shadow-xl transition duration-300 transform hover:-translate-y-2 hover:scale-105 overflow-hidden cursor-pointer flex flex-col"
               onClick={() => handleCardClick(blog)}
             >
-              <div className="relative">
+              {/* Fixed image height */}
+              <div className="relative h-[150px] overflow-hidden">
                 <img
                   src={blog.image}
                   alt={blog.title}
-                  className="w-full h-56 object-cover group-hover:scale-105 transition-all duration-300"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-all duration-300"
                 />
-                <div className="absolute top-0 left-0 right-0 bottom-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-50"></div>
+                <div className="absolute top-0 left-0 right-0 bottom-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-40"></div>
               </div>
-              <div className="p-6 text-left flex flex-col justify-between h-full">
+
+              {/* Text content */}
+              <div className="flex flex-col justify-between flex-1 p-5 text-left">
                 <div>
-                  <h3 className="text-xl font-semibold text-gray-800 mb-2">{blog.title}</h3>
-                  <p className="text-gray-600 text-sm mb-4">{blog.description}</p>
+                  <h3 className="text-lg font-semibold text-gray-800 mb-1">{blog.title}</h3>
+                  <p className="text-gray-600 text-sm mb-3 line-clamp-2">{blog.description}</p>
                 </div>
                 <div className="text-gray-500 text-xs flex justify-between items-center mt-auto">
                   <span>{blog.date}</span>
@@ -174,10 +177,13 @@ const BlogPage = () => {
         )}
       </div>
 
+
+
+
       {/* Blog Detail Modal */}
       {selectedBlog && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto p-6 relative">
+          <div className="bg-white rounded-lg shadow-xl max-w-6xl w-full max-h-[95vh] overflow-y-auto p-8 relative">
             <button
               onClick={closeDetail}
               className="absolute top-4 right-4 text-gray-600 hover:text-gray-800"
@@ -206,9 +212,9 @@ const BlogDetail = ({ blog }) => {
   const readingTime = "~ 6 minutes";
 
   return (
-    <div className="p-6">
+    <div className="">
       <div className="flex items-start mb-6">
-        <div className="w-1/4 pr-4">
+        <div className="w-60 pr-4">
           <div className="bg-gray-100 p-4 rounded-lg">
             <p className="text-gray-500 text-sm">Contributor</p>
             <div className="flex items-center mt-2">
@@ -225,7 +231,30 @@ const BlogDetail = ({ blog }) => {
             <p className="text-gray-500 text-sm mt-4">Reading Time</p>
             <p className="text-gray-800">{readingTime}</p>
           </div>
+          <div className="mt-12 border-l border-r border-gray-300 px-6">
+            {blog.sections.map((section, index) => (
+              <div key={index} className="mb-4">
+                {/* Display subheading if it exists */}
+                {section.subheading && (
+                  <li className="text-lg font-semibold text-gray-800 mb-2">
+                    {section.subheading}
+                  </li>
+                )}
+                {/* Display questions if they exist */}
+                {section.questions.length > 0 && (
+                  <ul className="list-disc pl-5">
+                    {section.questions.map((question, qIndex) => (
+                      <h3 key={qIndex} className="text-gray-600 text-sm mb-1">
+                        {question.questionText}
+                      </h3>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
+
         <div className="w-3/4">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">{blog.title}</h1>
           <div className="relative mb-6">
