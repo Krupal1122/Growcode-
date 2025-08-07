@@ -1,13 +1,15 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { useNavigate, Routes, Route } from "react-router-dom"; // Import Router components
 import APIInputTable from "./APIInputTable"; // Assuming APIInputTable is in the same directory
+import BlogDetail from "./BlogDetail"; // Import BlogDetail as a separate component
 
 const BlogPage = () => {
   const [showInputTable, setShowInputTable] = useState(false);
   const [blogs, setBlogs] = useState([]); // State to store API data
   const [loading, setLoading] = useState(true); // Loading state
   const [error, setError] = useState(null); // Error state
-  const [selectedBlog, setSelectedBlog] = useState(null); // State for selected blog
+  const navigate = useNavigate(); // Hook for navigation
 
   // Toggle input table visibility
   const toggleInputTable = () => {
@@ -19,9 +21,8 @@ const BlogPage = () => {
     const fetchForms = async () => {
       try {
         const response = await axios.get("http://localhost:5000/api/forms");
-        // Map API data to match the card structure using actual fields
         const formattedBlogs = response.data.map((form) => ({
-          id: form._id, // Use _id as a unique identifier
+          id: form._id,
           title: form.title,
           description: form.sections[0]?.questions[0]?.questionText || "No description available",
           image: form.image || "https://via.placeholder.com/150",
@@ -30,7 +31,7 @@ const BlogPage = () => {
             day: "numeric",
             year: "numeric",
           }),
-          sections: form.sections, // Pass sections as is for detailed view
+          sections: form.sections,
         }));
         setBlogs(formattedBlogs);
         setLoading(false);
@@ -44,17 +45,12 @@ const BlogPage = () => {
     fetchForms();
   }, []);
 
-  // Select the first blog as the featured article (or apply custom logic)
+  // Select the first blog as the featured article
   const featuredBlog = blogs[0];
 
-  // Handle card click to show details
+  // Handle card click to navigate to the detail page
   const handleCardClick = (blog) => {
-    setSelectedBlog(blog);
-  };
-
-  // Close detail view
-  const closeDetail = () => {
-    setSelectedBlog(null);
+    navigate(`/blog/${blog.id}`, { state: { blog } }); // Navigate to new page with blog data
   };
 
   return (
@@ -117,7 +113,7 @@ const BlogPage = () => {
         </div>
       ) : (
         <div
-          className=" max-w-screen-xl mx-auto mb-12 p-6 bg-white rounded-lg shadow-md flex items-center border border-gray-200 cursor-pointer hover:shadow-xl hover:-translate-y-2 hover:scale-105 transition duration-300"
+          className="max-w-screen-xl mx-auto mb-12 p-6 bg-white rounded-lg shadow-md flex items-center border border-gray-200 cursor-pointer hover:shadow-xl hover:-translate-y-2 hover:scale-105 transition duration-300"
           onClick={() => handleCardClick(featuredBlog)}
         >
           <div className="w-1/2">
@@ -151,7 +147,6 @@ const BlogPage = () => {
               className="h-[380px] group bg-white rounded-3xl shadow-md hover:shadow-xl transition duration-300 transform hover:-translate-y-2 hover:scale-105 overflow-hidden cursor-pointer flex flex-col"
               onClick={() => handleCardClick(blog)}
             >
-              {/* Fixed image height */}
               <div className="relative h-[150px] overflow-hidden">
                 <img
                   src={blog.image}
@@ -160,8 +155,6 @@ const BlogPage = () => {
                 />
                 <div className="absolute top-0 left-0 right-0 bottom-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-40"></div>
               </div>
-
-              {/* Text content */}
               <div className="flex flex-col justify-between flex-1 p-5 text-left">
                 <div>
                   <h3 className="text-lg font-semibold text-gray-800 mb-1">{blog.title}</h3>
@@ -177,198 +170,10 @@ const BlogPage = () => {
         )}
       </div>
 
-      {/* Blog Detail Modal */}
-      {selectedBlog && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-6xl w-full max-h-[95vh] overflow-y-auto p-8 relative">
-            <button
-              onClick={closeDetail}
-              className="absolute top-4 right-4 text-gray-600 hover:text-gray-800"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-            <BlogDetail blog={selectedBlog} />
-          </div>
-        </div>
-      )}
-    </div>
-  );
-};
-
-// BlogDetail Component with Scroll Highlighting for Single Active Element
-const BlogDetail = ({ blog }) => {
-  const [activeElement, setActiveElement] = useState(null); // State to track active element (subheading or question)
-  const contentRef = useRef(null); // Ref for the right-side content
-  const readingTime = " ";
-
-  // Scroll handler to detect the topmost element (subheading or question)
-  useEffect(() => {
-    const handleScroll = () => {
-      const sectionElements = document.querySelectorAll(".section-heading");
-      const questionElements = document.querySelectorAll(".question-heading");
-      let topElement = null;
-
-      // Check sections
-      sectionElements.forEach((section, index) => {
-        const rect = section.getBoundingClientRect();
-        if (rect.top <= 100 && rect.top >= -rect.height) {
-          topElement = {
-            type: "section",
-            value: blog.sections[index].subheading || `Section ${index + 1}`,
-          };
-        }
-      });
-
-      // Check questions (override section if a question is closer to the top)
-      questionElements.forEach((question, qIndex) => {
-        const rect = question.getBoundingClientRect();
-        if (rect.top <= 100 && rect.top >= -rect.height) {
-          let questionCount = 0;
-          for (let i = 0; i < blog.sections.length; i++) {
-            const questions = blog.sections[i].questions;
-            for (let j = 0; j < questions.length; j++) {
-              if (questionCount === qIndex) {
-                topElement = {
-                  type: "question",
-                  value: questions[j].questionText,
-                };
-                return;
-              }
-              questionCount++;
-            }
-          }
-        }
-      });
-
-      // Set the active element only if we found one
-      setActiveElement(topElement);
-    };
-
-    const contentElement = contentRef.current;
-    if (contentElement) {
-      contentElement.addEventListener("scroll", handleScroll);
-    }
-
-    return () => {
-      if (contentElement) {
-        contentElement.removeEventListener("scroll", handleScroll);
-      }
-    };
-  }, [blog.sections]);
-
-  return (
-    <div className="">
-      <div className="flex items-start mb-6">
-        <div className="w-60 pr-4 sticky top-6 self-start">
-          {/* Contributor Info */}
-          <div className="bg-gray-100 p-4 rounded-lg">
-            <p className="text-gray-500 text-sm">Contributor</p>
-            <div className="flex items-center mt-2">
-              <img
-                src="https://img.freepik.com/free-photo/waist-up-portrait-handsome-serious-unshaven-male-keeps-hands-together-dressed-dark-blue-shirt-has-talk-with-interlocutor-stands-against-white-wall-self-confident-man-freelancer_273609-16320.jpg"
-                alt="Contributor"
-                className="w-10 h-10 rounded-full mr-2"
-              />
-              <div>
-                <p className="text-gray-800 font-medium">Unknown</p>
-                <p className="text-gray-500 text-sm">{blog.date}</p>
-              </div>
-            </div>
-            <p className="text-gray-500 text-sm mt-4">Reading Time</p>
-            {/* <p className="text-gray-800">{readingTime}</p> */}
-          </div>
-
-          {/* Scrollable Section List */}
-          <div className="mt-6 border-l border-r border-gray-300 px-4 max-h-[460px] overflow-y-auto">
-            {blog.sections.map((section, index) => (
-              <div key={index} className="mb-4">
-                {section.subheading && (
-                  <li
-                    className={`text-base font-semibold mb-2 ${
-                      activeElement?.type === "section" &&
-                      activeElement?.value === section.subheading
-                        ? "text-blue-600"
-                        : "text-gray-800"
-                    }`}
-                  >
-                    {section.subheading}
-                  </li>
-                )}
-                {section.questions.length > 0 && (
-                  <ul className="list-disc pl-5">
-                    {section.questions.map((question, qIndex) => (
-                      <h3
-                        key={qIndex}
-                        className={`text-sm mb-1 ${
-                          activeElement?.type === "question" &&
-                          activeElement?.value === question.questionText
-                            ? "text-blue-600"
-                            : "text-gray-600"
-                        }`}
-                      >
-                        {question.questionText}
-                      </h3>
-                    ))}
-                  </ul>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div
-          className="w-3/4 max-h-[80vh] overflow-y-auto"
-          ref={contentRef}
-        >
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">{blog.title}</h1>
-          <div className="relative mb-6">
-            <img
-              src={blog.image}
-              alt={blog.title}
-              className="w-full h-64 object-cover rounded-lg"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-50"></div>
-            <div className="absolute bottom-4 left-4">
-              <img
-                src="https://via.placeholder.com/100"
-                alt="Company Logo"
-                className="w-24 h-auto"
-              />
-            </div>
-          </div>
-          <div className="text-gray-600">
-            <ul className="list-disc pl-5 mt-2 text-gray-600">
-              {blog.sections.map((section, index) => (
-                <li key={index}>
-                  <div className="section-heading font-semibold text-gray-800 mb-2">
-                    {section.subheading || `Section ${index + 1}`}
-                  </div>
-                  {section.questions.length > 0 && (
-                    <ul className="list-circle pl-5 mt-1">
-                      {section.questions.map((question, qIndex) => (
-                        <li key={qIndex}>
-                          <div className="question-heading font-medium text-gray-800">
-                            {question.questionText}
-                          </div>
-                          <div className="text-gray-500 text-sm ml-4">{question.answerText}</div>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      </div>
+      {/* Define Routes for Blog Detail */}
+      <Routes>
+        <Route path="/blog/:id" element={<BlogDetail />} />
+      </Routes>
     </div>
   );
 };
