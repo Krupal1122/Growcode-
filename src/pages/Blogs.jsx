@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { useNavigate, Routes, Route, useLocation } from "react-router-dom"; // Add useLocation
+import { useNavigate, Routes, Route, useLocation } from "react-router-dom";
 import APIInputTable from "./APIInputTable";
 import BlogDetail from "./BlogDetail";
 
@@ -10,14 +10,12 @@ const BlogPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
-  const location = useLocation(); // Hook to get current URL
+  const location = useLocation();
 
-  // Toggle input table visibility
   const toggleInputTable = () => {
     setShowInputTable(!showInputTable);
   };
 
-  // Fetch data from the API
   useEffect(() => {
     const fetchForms = async () => {
       try {
@@ -46,20 +44,16 @@ const BlogPage = () => {
     fetchForms();
   }, []);
 
-  // Select the first blog as the featured article
   const featuredBlog = blogs[0];
 
-  // Handle card click to navigate to the detail page
   const handleCardClick = (blog) => {
     navigate(`/blog/${blog.id}`, { state: { blog } });
   };
 
-  // Check if the current path is /blogs-admin
   const isAdminPage = location.pathname === "/blogs-admin";
 
   return (
     <div className="bg-white py-16 px-6 text-gray-800 font-sans">
-      {/* Conditionally render the button only for /blogs-admin */}
       {isAdminPage && (
         <div className="max-w-3xl mx-auto text-center mb-14">
           <div className="mb-6">
@@ -82,7 +76,6 @@ const BlogPage = () => {
         </div>
       )}
 
-      {/* Modal for APIInputTable */}
       {showInputTable && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[80vh] overflow-y-auto p-6 relative">
@@ -105,7 +98,6 @@ const BlogPage = () => {
         </div>
       )}
 
-      {/* Featured Article Card */}
       {loading ? (
         <div className="max-w-screen-xl mx-auto mb-12 p-6 bg-white rounded-lg shadow-md flex items-center border border-gray-200">
           <p className="text-center text-gray-600 w-full">Loading featured article...</p>
@@ -139,7 +131,6 @@ const BlogPage = () => {
         </div>
       )}
 
-      {/* Dynamic Blog Cards */}
       <div className="max-w-screen-xl mx-auto grid gap-10 sm:grid-cols-2 lg:grid-cols-3 px-4">
         {loading ? (
           <p className="text-center text-gray-600">Loading...</p>
@@ -177,7 +168,6 @@ const BlogPage = () => {
         )}
       </div>
 
-      {/* Define Routes for Blog Detail */}
       <Routes>
         <Route path="/blog/:id" element={<BlogDetail />} />
       </Routes>
