@@ -108,7 +108,7 @@ const BlogDetail = () => {
 
   return (
     <div className="bg-white text-gray-800 font-sans w-screen min-h-screen flex">
-      <div className="flex w-full h-full">
+      <div className="flex w-full h-full mt-16">
         {/* Sidebar */}
         <div className="w-60 pr-4 sticky top-0 self-start h-screen overflow-y-auto bg-gray-50 p-4">
           <div className="bg-gray-100 p-4 rounded-lg">
@@ -173,11 +173,7 @@ const BlogDetail = () => {
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-50"></div>
             <div className="absolute bottom-4 left-4">
-              <img
-                src="https://via.placeholder.com/100"
-                alt="Company Logo"
-                className="w-24 h-auto"
-              />
+            
             </div>
           </div>
           <div className="text-gray-600">
