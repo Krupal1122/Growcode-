@@ -12,8 +12,8 @@ import About from "./pages/About";
 import Growcodecontact from "./pages/Growcodecontact";
 import GrowcodeServices from "./pages/GrowcodeServices";
 import Jobdata from "./pages/Jobdata";
-import Blogs from "./pages/Blogs"; // Use Blogs instead of BlogPage
-import BlogDetail from "./pages/BlogDetail"; // BlogDetail will be created
+import Blogs from "./pages/Blogs"; // Use Blogs (your BlogPage component)
+import BlogDetail from "./pages/BlogDetail";
 
 const App = () => {
   return (
@@ -26,7 +26,8 @@ const App = () => {
           <Route path="/services" element={<GrowcodeServices />} />
           <Route path="/career" element={<Jobdata />} />
           <Route path="/portfolio" element={<Projects />} />
-          <Route path="/blogs" element={<Blogs />} /> {/* Use Blogs for /blogs route */}
+          <Route path="/blogs" element={<Blogs />} />
+          <Route path="/blogs-admin" element={<Blogs />} /> {/* Add blogs-admin route */}
           <Route path="/blog/:id" element={<BlogDetail />} />
           <Route path="/contact" element={<Growcodecontact />} />
         </Routes>

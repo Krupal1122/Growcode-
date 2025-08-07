@@ -110,7 +110,7 @@ const BlogDetail = () => {
     <div className="bg-white text-gray-800 font-sans w-screen min-h-screen flex">
       <div className="flex w-full h-full mt-16">
         {/* Sidebar */}
-        <div className="w-60 pr-4 sticky top-0 self-start h-screen overflow-y-auto bg-gray-50 p-4">
+        <div className="w-72 pr-4 sticky top-0 self-start h-screen overflow-y-auto bg-gray-50 p-4 ml-10">
           <div className="bg-gray-100 p-4 rounded-lg">
             <p className="text-gray-500 text-sm">Contributor</p>
             <div className="flex items-center mt-2">

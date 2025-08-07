@@ -1,15 +1,16 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { useNavigate, Routes, Route } from "react-router-dom"; // Import Router components
-import APIInputTable from "./APIInputTable"; // Assuming APIInputTable is in the same directory
-import BlogDetail from "./BlogDetail"; // Import BlogDetail as a separate component
+import { useNavigate, Routes, Route, useLocation } from "react-router-dom"; // Add useLocation
+import APIInputTable from "./APIInputTable";
+import BlogDetail from "./BlogDetail";
 
 const BlogPage = () => {
   const [showInputTable, setShowInputTable] = useState(false);
-  const [blogs, setBlogs] = useState([]); // State to store API data
-  const [loading, setLoading] = useState(true); // Loading state
-  const [error, setError] = useState(null); // Error state
-  const navigate = useNavigate(); // Hook for navigation
+  const [blogs, setBlogs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const navigate = useNavigate();
+  const location = useLocation(); // Hook to get current URL
 
   // Toggle input table visibility
   const toggleInputTable = () => {
@@ -50,30 +51,36 @@ const BlogPage = () => {
 
   // Handle card click to navigate to the detail page
   const handleCardClick = (blog) => {
-    navigate(`/blog/${blog.id}`, { state: { blog } }); // Navigate to new page with blog data
+    navigate(`/blog/${blog.id}`, { state: { blog } });
   };
+
+  // Check if the current path is /blogs-admin
+  const isAdminPage = location.pathname === "/blogs-admin";
 
   return (
     <div className="bg-white py-16 px-6 text-gray-800 font-sans">
-      <div className="max-w-3xl mx-auto text-center mb-14">
-        <div className="mb-6">
-          <button
-            onClick={toggleInputTable}
-            className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-full shadow-md hover:shadow-lg transition duration-300 flex items-center gap-2 mx-auto"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
+      {/* Conditionally render the button only for /blogs-admin */}
+      {isAdminPage && (
+        <div className="max-w-3xl mx-auto text-center mb-14">
+          <div className="mb-6">
+            <button
+              onClick={toggleInputTable}
+              className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-full shadow-md hover:shadow-lg transition duration-300 flex items-center gap-2 mx-auto"
             >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-            </svg>
-            {showInputTable ? "Close Input Table" : "Add Blog"}
-          </button>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              {showInputTable ? "Close Input Table" : "Add Blog"}
+            </button>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Modal for APIInputTable */}
       {showInputTable && (
