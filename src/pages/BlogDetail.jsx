@@ -169,7 +169,7 @@ const BlogDetail = () => {
             <img
               src={blog.image}
               alt={blog.title}
-              className="w-full h-full object-cover rounded-lg"
+              className="w-full h-64 object-cover rounded-lg"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-50"></div>
             <div className="absolute bottom-4 left-4">

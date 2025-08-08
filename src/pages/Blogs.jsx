@@ -50,11 +50,11 @@ const BlogPage = () => {
     navigate(`/blog/${blog.id}`, { state: { blog } });
   };
 
-  const isAdminPage = location.pathname === "/blogs-admin";
+  // const isAdminPage = location.pathname === "/blogs-admin";
 
   return (
     <div className="bg-white py-16 px-6 text-gray-800 font-sans">
-      {isAdminPage && (
+      {/* {isAdminPage && (
         <div className="max-w-3xl mx-auto text-center mb-14">
           <div className="mb-6">
             <button
@@ -74,7 +74,7 @@ const BlogPage = () => {
             </button>
           </div>
         </div>
-      )}
+      )} */}
 
       {showInputTable && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
