@@ -14,8 +14,8 @@ import GrowcodeServices from "./pages/GrowcodeServices";
 import Jobdata from "./pages/Jobdata";
 import Blogs from "./pages/Blogs"; // Your BlogPage component
 import BlogDetail from "./pages/BlogDetail";
-import Login from "./pages/Login"; // New Login component
-import ProtectedRoute from "./pages/ProtectedRoute"; // New ProtectedRoute component
+import Login from "./pages/Login"; // Login component
+import ProtectedRoute from "./pages/ProtectedRoute"; // ProtectedRoute component
 
 const App = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
@@ -43,7 +43,10 @@ const App = () => {
           />
           <Route path="/blog/:id" element={<BlogDetail />} />
           <Route path="/contact" element={<Growcodecontact />} />
-          <Route path="/login" element={<Login setIsAuthenticated={setIsAuthenticated} />} />
+          <Route
+            path="/login"
+            element={<Login setIsAuthenticated={setIsAuthenticated} />}
+          />
         </Routes>
         <Footer />
       </div>

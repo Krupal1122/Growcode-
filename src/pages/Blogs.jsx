@@ -125,7 +125,9 @@ const BlogPage = () => {
           <div className="w-1/2 pl-6">
             <h2 className="text-2xl font-semibold text-gray-800 mb-2">{featuredBlog.title}</h2>
             <p className="text-gray-600 mb-4">{featuredBlog.description}</p>
-            <span className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">#Application</span>
+            <span className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
+              #Application
+            </span>
             <p className="text-gray-500 text-sm mt-2">{featuredBlog.date}</p>
           </div>
         </div>
