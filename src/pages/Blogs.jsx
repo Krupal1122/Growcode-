@@ -9,11 +9,20 @@ const BlogPage = () => {
   const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [showLogin, setShowLogin] = useState(false);
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [loginError, setLoginError] = useState("");
   const navigate = useNavigate();
   const location = useLocation();
 
   const toggleInputTable = () => {
     setShowInputTable(!showInputTable);
+  };
+
+  const handleCardClick = (blog) => {
+    navigate(`/blog/${blog.id}`, { state: { blog } });
   };
 
   useEffect(() => {
@@ -42,19 +51,73 @@ const BlogPage = () => {
     };
 
     fetchForms();
-  }, []);
 
-  const featuredBlog = blogs[0];
+    if (location.pathname === "/blogs-admin" && !isAuthenticated) {
+      setShowLogin(true);
+    }
+  }, [location.pathname, isAuthenticated]);
 
-  const handleCardClick = (blog) => {
-    navigate(`/blog/${blog.id}`, { state: { blog } });
+  const handleLogin = (e) => {
+    e.preventDefault();
+    if (username === "kk" && password === "1212") {
+      setIsAuthenticated(true);
+      setShowLogin(false);
+      setLoginError("");
+      navigate("/blogs-admin");
+    } else {
+      setLoginError("Invalid username or password");
+    }
   };
 
+  const featuredBlog = blogs[0];
   const isAdminPage = location.pathname === "/blogs-admin";
 
   return (
     <div className="bg-white py-16 px-6 text-gray-800 font-sans">
-      {isAdminPage && (
+      {showLogin && !isAuthenticated && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+            <h2 className="text-2xl font-semibold text-gray-800 mb-4 text-center">Admin Login</h2>
+            <form onSubmit={handleLogin}>
+              <div className="mb-4">
+                <label htmlFor="username" className="block text-gray-700 mb-2">
+                  Username
+                </label>
+                <input
+                  type="text"
+                  id="username"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+                  placeholder="Enter username"
+                />
+              </div>
+              <div className="mb-4">
+                <label htmlFor="password" className="block text-gray-700 mb-2">
+                  Password
+                </label>
+                <input
+                  type="password"
+                  id="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+                  placeholder="Enter password"
+                />
+              </div>
+              {loginError && <p className="text-red-600 text-sm mb-4">{loginError}</p>}
+              <button
+                type="submit"
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-lg shadow-md hover:shadow-lg transition duration-300"
+              >
+                Login
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {isAdminPage && isAuthenticated && (
         <div className="max-w-3xl mx-auto text-center mb-14">
           <div className="mb-6">
             <button
@@ -76,7 +139,7 @@ const BlogPage = () => {
         </div>
       )}
 
-      {showInputTable && (
+      {showInputTable && isAuthenticated && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[80vh] overflow-y-auto p-6 relative">
             <button
@@ -125,7 +188,9 @@ const BlogPage = () => {
           <div className="w-1/2 pl-6">
             <h2 className="text-2xl font-semibold text-gray-800 mb-2">{featuredBlog.title}</h2>
             <p className="text-gray-600 mb-4">{featuredBlog.description}</p>
-            <span className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">#Application</span>
+            <span className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
+              #Application
+            </span>
             <p className="text-gray-500 text-sm mt-2">{featuredBlog.date}</p>
           </div>
         </div>
