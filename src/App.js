@@ -1,4 +1,3 @@
-// App.jsx (artifact ID: c72d7da0-a300-4054-b4e3-b842faadd0d4)
 import React, { useState } from "react";
 import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import Navbar from "./pages/Navbar";
@@ -18,6 +17,9 @@ import BlogDetail from "./pages/BlogDetail";
 import Login from "./pages/Login";
 import ProtectedRoute from "./pages/ProtectedRoute";
 import Admin from "./components/Admin";
+import APIInputTable from "./components/APIInputTable";
+import FormCard from "./components/FormCard";
+import FormDetail from "./components/FormDetail";
 
 const Layout = ({ children }) => {
   const location = useLocation();
@@ -69,15 +71,14 @@ const App = () => {
               </ProtectedRoute>
             }
           >
-            <Route path="dashboard" element={<div>Dashboard Content</div>} />
+            <Route path="dashboard" element={<div></div>} />
             <Route path="team" element={<div>Team Content</div>} />
             <Route path="projects" element={<div>Projects Content</div>} />
             <Route path="calendar" element={<div>Calendar Content</div>} />
-            <Route path="documents" element={<div>Documents Content</div>} />
+            <Route path="documents" element={<FormCard />} />
+            <Route path="documents/add" element={<APIInputTable />} />
+            <Route path="documents/form/:id" element={<FormDetail />} />
             <Route path="reports" element={<div>Reports Content</div>} />
-            <Route path="heroicons" element={<div>Heroicons Content</div>} />
-            <Route path="tailwind-labs" element={<div>Tailwind Labs Content</div>} />
-            <Route path="workcation" element={<div>Workcation Content</div>} />
           </Route>
         </Routes>
       </Layout>

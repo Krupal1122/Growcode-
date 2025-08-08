@@ -1,56 +1,52 @@
-// components/Sidebar.jsx
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
+import {
+  Home,
+  Briefcase,
+  Users,
+  Folder,
+  FileText,
+  BarChart,
+  Phone,
+} from "lucide-react";
+
+const menuItems = [
+  { label: "Dashboard", to: "/admin/dashboard", icon: <Home size={20} /> },
+  { label: "Team", to: "/admin/team", icon: <Briefcase size={20} /> },
+  { label: "Projects", to: "/admin/projects", icon: <Users size={20} /> },
+  { label: "Calendar", to: "/admin/calendar", icon: <Folder size={20} /> },
+  { label: "Documents", to: "/admin/documents", icon: <FileText size={20} /> },
+  { label: "Reports", to: "/admin/reports", icon: <Phone size={20} /> },
+];
 
 function Sidebar() {
+  const location = useLocation();
+
   return (
-    <div className="w-64 bg-white shadow-md h-full">
-      <div className="p-4">
-        <div className="text-2xl font-bold mb-6">🏠</div>
-        <ul className="space-y-2">
-          <li className="flex items-center p-2 text-gray-700 hover:bg-gray-100 rounded">
-            <span className="mr-2">🏠</span>
-            <Link to="/admin/dashboard">Dashboard</Link>
-          </li>
-          <li className="flex items-center p-2 text-gray-700 hover:bg-gray-100 rounded">
-            <span className="mr-2">👥</span>
-            <Link to="/admin/team">Team</Link>
-          </li>
-          <li className="flex items-center p-2 text-gray-700 hover:bg-gray-100 rounded">
-            <span className="mr-2">📁</span>
-            <Link to="/admin/projects">Projects</Link>
-          </li>
-          <li className="flex items-center p-2 text-gray-700 hover:bg-gray-100 rounded">
-            <span className="mr-2">📅</span>
-            <Link to="/admin/calendar">Calendar</Link>
-          </li>
-          <li className="flex items-center p-2 text-gray-700 hover:bg-gray-100 rounded">
-            <span className="mr-2">📄</span>
-            <Link to="/admin/documents">Documents</Link>
-          </li>
-          <li className="flex items-center p-2 text-gray-700 hover:bg-gray-100 rounded">
-            <span className="mr-2">📊</span>
-            <Link to="/admin/reports">Reports</Link>
-          </li>
-        </ul>
-        <div className="mt-6">
-          <p className="text-sm text-gray-500">Your teams</p>
-          <ul className="mt-2 space-y-1">
-            <li className="flex items-center p-2 text-gray-700 hover:bg-gray-100 rounded">
-              <span className="mr-2">H</span>
-              <Link to="/admin/heroicons">Heroicons</Link>
-            </li>
-            <li className="flex items-center p-2 text-gray-700 hover:bg-gray-100 rounded">
-              <span className="mr-2">T</span>
-              <Link to="/admin/tailwind-labs">Tailwind Labs</Link>
-            </li>
-            <li className="flex items-center p-2 text-gray-700 hover:bg-gray-100 rounded">
-              <span className="mr-2">W</span>
-              <Link to="/admin/workcation">Workcation</Link>
-            </li>
-          </ul>
-        </div>
+    <div className="w-64 bg-white shadow-lg h-screen border-r border-gray-200 fixed top-0 left-0 overflow-y-auto">
+      <div className="p-6 text-center border-b border-gray-100">
+        <h1 className="text-2xl font-extrabold text-gray-800 tracking-wide">Admin Panel</h1>
       </div>
+      <ul className="p-4 space-y-2">
+        {menuItems.map((item, idx) => {
+          const isActive = location.pathname === item.to;
+          return (
+            <li key={idx}>
+              <Link
+                to={item.to}
+                className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-all ${
+                  isActive
+                    ? "bg-blue-100 text-blue-700 font-semibold"
+                    : "text-gray-700 hover:bg-gray-100"
+                }`}
+              >
+                <span>{item.icon}</span>
+                <span>{item.label}</span>
+              </Link>
+            </li>
+          );
+        })}
+      </ul>
     </div>
   );
 }

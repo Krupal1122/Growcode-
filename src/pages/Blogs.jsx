@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate, Routes, Route, useLocation } from "react-router-dom";
-import APIInputTable from "./APIInputTable";
+import APIInputTable from "../components/APIInputTable";
 import BlogDetail from "./BlogDetail";
 
 const BlogPage = () => {
