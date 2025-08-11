@@ -21,6 +21,10 @@ import APIInputTable from "./components/Blogs/APIInputTable";
 import FormCard from "./components/Blogs/FormCard";
 import FormDetail from "./components/Blogs/FormDetail";
 
+// Temporary BlogPage replacement
+// If you want your homepage to show blogs, you can later replace <Hero /> with something else
+const BlogPage = () => <Hero />;
+
 const Layout = ({ children }) => {
   const location = useLocation();
   const isAdminRoute = location.pathname.startsWith("/admin");
@@ -43,12 +47,21 @@ const App = () => {
     <Router>
       <Layout>
         <Routes>
-          <Route path="/" element={<Hero />} />
+          {/* Public Routes */}
+          <Route path="/" element={<BlogPage />} />
           <Route path="/about" element={<About />} />
           <Route path="/services" element={<GrowcodeServices />} />
           <Route path="/career" element={<Jobdata />} />
           <Route path="/portfolio" element={<Projects />} />
           <Route path="/blogs" element={<Blogs />} />
+          <Route path="/blog/:id" element={<BlogDetail />} />
+          <Route path="/contact" element={<Growcodecontact />} />
+          <Route
+            path="/login"
+            element={<Login setIsAuthenticated={setIsAuthenticated} />}
+          />
+
+          {/* Admin Routes */}
           <Route
             path="/blogs-admin"
             element={
@@ -56,12 +69,6 @@ const App = () => {
                 <Blogs />
               </ProtectedRoute>
             }
-          />
-          <Route path="/blog/:id" element={<BlogDetail />} />
-          <Route path="/contact" element={<Growcodecontact />} />
-          <Route
-            path="/login"
-            element={<Login setIsAuthenticated={setIsAuthenticated} />}
           />
           <Route
             path="/admin"
@@ -71,7 +78,7 @@ const App = () => {
               </ProtectedRoute>
             }
           >
-            <Route path="dashboard" element={<div></div>} />
+            <Route path="dashboard" element={<div>Dashboard Content</div>} />
             <Route path="team" element={<div>Team Content</div>} />
             <Route path="projects" element={<div>Projects Content</div>} />
             <Route path="calendar" element={<div>Calendar Content</div>} />
