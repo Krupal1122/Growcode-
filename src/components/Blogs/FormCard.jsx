@@ -66,7 +66,7 @@ const FormCard = () => {
         <h1 className="text-3xl font-bold text-gray-800 tracking-tight">
           Submitted Forms
         </h1>
-        <Link to="/admin/documents/add">
+        <Link to="/admin/Blogs/add">
           <button className="bg-blue-600 text-white px-6 py-2.5 rounded-full hover:bg-blue-700 transform hover:scale-105 transition-all duration-300 shadow-md flex items-center gap-2">
             <svg
               xmlns="http://www.w3.org/2000/svg"
