@@ -9,6 +9,8 @@ const BlogPage = () => {
   const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1); // Current page state
+  const blogsPerPage = 9; // Number of blogs per page
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -48,6 +50,17 @@ const BlogPage = () => {
 
   const handleCardClick = (blog) => {
     navigate(`/blog/${blog.id}`, { state: { blog } });
+  };
+
+  // Pagination logic
+  const indexOfLastBlog = currentPage * blogsPerPage;
+  const indexOfFirstBlog = indexOfLastBlog - blogsPerPage;
+  const currentBlogs = blogs.slice(indexOfFirstBlog, indexOfLastBlog);
+  const totalPages = Math.ceil(blogs.length / blogsPerPage);
+
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+    window.scrollTo({ top: 0, behavior: "smooth" }); // Scroll to top on page change
   };
 
   // const isAdminPage = location.pathname === "/blogs-admin";
@@ -138,10 +151,10 @@ const BlogPage = () => {
           <p className="text-center text-gray-600">Loading...</p>
         ) : error ? (
           <p className="text-center text-red-600">{error}</p>
-        ) : blogs.length === 0 ? (
+        ) : currentBlogs.length === 0 ? (
           <p className="text-center text-gray-600">No blogs available.</p>
         ) : (
-          blogs.map((blog, index) => (
+          currentBlogs.map((blog, index) => (
             <div
               key={index}
               className="h-[380px] group bg-white rounded-3xl shadow-md hover:shadow-xl transition duration-300 transform hover:-translate-y-2 hover:scale-105 overflow-hidden cursor-pointer flex flex-col"
@@ -169,6 +182,47 @@ const BlogPage = () => {
           ))
         )}
       </div>
+
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <div className="max-w-screen-xl mx-auto mt-10 flex justify-center items-center gap-2">
+          <button
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+            className={`px-4 py-2 rounded-full text-sm font-semibold transition duration-300 ${
+              currentPage === 1
+                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                : "bg-blue-600 text-white hover:bg-blue-700"
+            }`}
+          >
+            Previous
+          </button>
+          {Array.from({ length: totalPages }, (_, index) => (
+            <button
+              key={index + 1}
+              onClick={() => handlePageChange(index + 1)}
+              className={`px-4 py-2 rounded-full text-sm font-semibold transition duration-300 ${
+                currentPage === index + 1
+                  ? "bg-blue-600 text-white"
+                  : "bg-gray-200 text-gray-800 hover:bg-gray-300"
+              }`}
+            >
+              {index + 1}
+            </button>
+          ))}
+          <button
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            className={`px-4 py-2 rounded-full text-sm font-semibold transition duration-300 ${
+              currentPage === totalPages
+                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                : "bg-blue-600 text-white hover:bg-blue-700"
+            }`}
+          >
+            Next
+          </button>
+        </div>
+      )}
 
       <Routes>
         <Route path="/blog/:id" element={<BlogDetail />} />
