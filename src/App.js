@@ -82,9 +82,9 @@ const App = () => {
             <Route path="team" element={<div>Team Content</div>} />
             <Route path="projects" element={<div>Projects Content</div>} />
             <Route path="calendar" element={<div>Calendar Content</div>} />
-            <Route path="documents" element={<FormCard />} />
-            <Route path="documents/add" element={<APIInputTable />} />
-            <Route path="documents/form/:id" element={<FormDetail />} />
+            <Route path="Blogs" element={<FormCard />} />
+            <Route path="Blogs/add" element={<APIInputTable />} />
+            <Route path="Blogs/form/:id" element={<FormDetail />} />
             <Route path="reports" element={<div>Reports Content</div>} />
           </Route>
         </Routes>

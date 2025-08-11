@@ -15,7 +15,7 @@ const menuItems = [
   { label: "Team", to: "/admin/team", icon: <Briefcase size={20} /> },
   { label: "Projects", to: "/admin/projects", icon: <Users size={20} /> },
   { label: "Calendar", to: "/admin/calendar", icon: <Folder size={20} /> },
-  { label: "Documents", to: "/admin/documents", icon: <FileText size={20} /> },
+  { label: "Blogs", to: "/admin/Blogs", icon: <FileText size={20} /> },
   { label: "Reports", to: "/admin/reports", icon: <Phone size={20} /> },
 ];
 
