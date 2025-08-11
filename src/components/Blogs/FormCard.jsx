@@ -6,6 +6,8 @@ const FormCard = () => {
   const [forms, setForms] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10; // Number of items per page
 
   useEffect(() => {
     const fetchForms = async () => {
@@ -33,6 +35,29 @@ const FormCard = () => {
     };
     fetchForms();
   }, []);
+
+  // Calculate pagination details
+  const totalPages = Math.ceil(forms.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentForms = forms.slice(startIndex, endIndex);
+
+  // Handle page navigation
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
+
+  const handlePrevious = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const handleNext = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
 
   return (
     <div className="max-w-7xl mx-auto p-6 sm:p-8 bg-gray-50 min-h-screen">
@@ -111,8 +136,8 @@ const FormCard = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
-                {forms.length > 0 ? (
-                  forms.map((form) => (
+                {currentForms.length > 0 ? (
+                  currentForms.map((form) => (
                     <tr
                       key={form.id}
                       className="hover:bg-gray-50 transition duration-200"
@@ -172,6 +197,82 @@ const FormCard = () => {
               </tbody>
             </table>
           </div>
+
+          {/* Pagination Controls */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between p-6 bg-white border-t border-gray-200">
+              <button
+                onClick={handlePrevious}
+                disabled={currentPage === 1}
+                className={`flex items-center px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
+                  currentPage === 1
+                    ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                    : 'bg-blue-600 text-white hover:bg-blue-700 hover:scale-105 shadow-sm'
+                }`}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-4 w-4 mr-2"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15 19l-7-7 7-7"
+                  />
+                </svg>
+                Previous
+              </button>
+
+              <div className="flex items-center space-x-2">
+                {[...Array(totalPages)].map((_, index) => {
+                  const page = index + 1;
+                  return (
+                    <button
+                      key={page}
+                      onClick={() => handlePageChange(page)}
+                      className={`px-3 py-1 rounded-full text-sm font-medium transition-all duration-300 ${
+                        currentPage === page
+                          ? 'bg-indigo-600 text-white shadow-md'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200 hover:scale-105'
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <button
+                onClick={handleNext}
+                disabled={currentPage === totalPages}
+                className={`flex items-center px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
+                  currentPage === totalPages
+                    ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                    : 'bg-blue-600 text-white hover:bg-blue-700 hover:scale-105 shadow-sm'
+                }`}
+              >
+                Next
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-4 w-4 ml-2"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 5l7 7-7 7"
+                  />
+                </svg>
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>
