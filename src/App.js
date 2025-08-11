@@ -16,10 +16,10 @@ import Blogs from "./pages/Blogs";
 import BlogDetail from "./pages/BlogDetail";
 import Login from "./pages/Login";
 import ProtectedRoute from "./pages/ProtectedRoute";
-import Admin from "./components/Admin";
-import APIInputTable from "./components/APIInputTable";
-import FormCard from "./components/FormCard";
-import FormDetail from "./components/FormDetail";
+import Admin from "./components/Blogs/Admin";
+import APIInputTable from "./components/Blogs/APIInputTable";
+import FormCard from "./components/Blogs/FormCard";
+import FormDetail from "./components/Blogs/FormDetail";
 
 const Layout = ({ children }) => {
   const location = useLocation();
