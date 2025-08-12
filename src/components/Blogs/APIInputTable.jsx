@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { UploadCloud } from 'lucide-react';
 import axios from 'axios';
 import RichTextEditor from "react-simple-wysiwyg";
@@ -56,13 +56,31 @@ const ImageUpload = ({ selectedImage, setSelectedImage, setImageUrl }) => {
 };
 
 export default function APIInputTable() {
-  const [formData, setFormData] = useState({
-    title: '',
-    sections: [],
-  });
-  const [selectedImage, setSelectedImage] = useState(null);
-  const [imageUrl, setImageUrl] = useState(null);
+  const location = useLocation(); // Get the location object to access passed state
   const navigate = useNavigate();
+
+  // Initialize state with passed form data (for editing) or default (for creating)
+  const [formData, setFormData] = useState({
+    title: location.state?.blog?.title || '',
+    sections: location.state?.blog?.sections || [],
+  });
+  const [selectedImage, setSelectedImage] = useState(location.state?.blog?.image || null);
+  const [imageUrl, setImageUrl] = useState(location.state?.blog?.image || null);
+  const [isEditing, setIsEditing] = useState(!!location.state?.blog); // Determine if in edit mode
+  const formId = location.state?.blog?.id; // Get form ID for editing
+
+  // Update formData if location.state changes (optional, for safety)
+  useEffect(() => {
+    if (location.state?.blog) {
+      setFormData({
+        title: location.state.blog.title,
+        sections: location.state.blog.sections,
+      });
+      setSelectedImage(location.state.blog.image);
+      setImageUrl(location.state.blog.image);
+      setIsEditing(true);
+    }
+  }, [location.state]);
 
   const handleTitleChange = (e) => {
     setFormData({ ...formData, title: e.target.value });
@@ -73,7 +91,7 @@ export default function APIInputTable() {
       ...formData,
       sections: [
         ...formData.sections,
-        { subheading: '', questions: [{ questionText: ''}] },
+        { subheading: '', questions: [{ questionText: '' }] },
       ],
     });
   };
@@ -124,23 +142,38 @@ export default function APIInputTable() {
         image: imageUrl,
         sections: formData.sections,
       };
-      const response = await axios.post('http://localhost:5000/api/forms', payload, {
-        headers: { 'Content-Type': 'application/json' },
-      });
-      alert('Form data saved to MongoDB!');
+
+      if (isEditing) {
+        // Update existing form (PUT request)
+        await axios.put(`http://localhost:5000/api/forms/${formId}`, payload, {
+          headers: { 'Content-Type': 'application/json' },
+        });
+        alert('Form updated successfully!');
+      } else {
+        // Create new form (POST request)
+        await axios.post('http://localhost:5000/api/forms', payload, {
+          headers: { 'Content-Type': 'application/json' },
+        });
+        alert('Form data saved to MongoDB!');
+      }
+
+      // Reset form and navigate back
       setFormData({ title: '', sections: [] });
       setSelectedImage(null);
       setImageUrl(null);
+      setIsEditing(false);
       navigate('/admin/Blogs');
     } catch (error) {
       console.error('Error submitting form:', error.response?.data || error.message);
-      alert('Error saving form data');
+      alert(isEditing ? 'Error updating form data' : 'Error saving form data');
     }
   };
 
   return (
     <div className="max-w-4xl mx-auto px-6 py-8 space-y-8 text-black">
-      <h1 className="text-3xl font-bold mb-4 text-black">📝 Form Builder</h1>
+      <h1 className="text-3xl font-bold mb-4 text-black">
+        {isEditing ? '✏️ Edit Form' : '📝 Form Builder'}
+      </h1>
 
       <ImageUpload
         selectedImage={selectedImage}
@@ -180,23 +213,14 @@ export default function APIInputTable() {
                 key={questionIndex}
                 className="bg-gray-50 border border-gray-200 p-4 rounded-lg space-y-2"
               >
-                {/* <input
-                  type="text"
-                  className="w-full border border-gray-300 p-2 rounded"
-                  placeholder="Enter question text"
+                <RichTextEditor
                   value={question.questionText}
                   onChange={(e) =>
                     updateQuestion(sectionIndex, questionIndex, 'questionText', e.target.value)
                   }
-                  /> */}
-                <RichTextEditor
-                     value={question.questionText}
-                     onChange={(e) =>
-                       updateQuestion(sectionIndex, questionIndex, 'questionText', e.target.value)
-                     }
-                     className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                     style={{ minHeight: '150px' }}
-                   />
+                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  style={{ minHeight: '150px' }}
+                />
                 <button
                   onClick={() => removeQuestion(sectionIndex, questionIndex)}
                   className="text-red-500 text-sm hover:underline"
@@ -227,7 +251,7 @@ export default function APIInputTable() {
           onClick={handleSubmit}
           className="bg-green-600 hover:bg-green-700 text-white font-medium px-6 py-2 rounded-lg shadow-md transition duration-300"
         >
-          ✅ Submit
+          {isEditing ? '✅ Update' : '✅ Submit'}
         </button>
       </div>
     </div>

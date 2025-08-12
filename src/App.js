@@ -84,7 +84,7 @@ const App = () => {
             <Route path="calendar" element={<div>Calendar Content</div>} />
             <Route path="Blogs" element={<FormCard />} />
             <Route path="Blogs/add" element={<APIInputTable />} />
-            <Route path="Blogs/edit/:id" element={<EditForm />} />
+            <Route path="Blogs/edit/:id" element={<APIInputTable />} />
             <Route path="Blogs/form/:id" element={<FormDetail />} />
             <Route path="reports" element={<div>Reports Content</div>} />
           </Route>

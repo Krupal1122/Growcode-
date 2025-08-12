@@ -142,17 +142,6 @@ const EditForm = () => {
                     className="w-full p-2 border rounded-md"
                     required
                   />
-                  <label className="block text-gray-700 font-medium mt-2 mb-2">
-                    Answer
-                  </label>
-                  <input
-                    type="text"
-                    value={question.answerText || ''}
-                    onChange={(e) =>
-                      handleQuestionChange(sectionIndex, questionIndex, 'answerText', e.target.value)
-                    }
-                    className="w-full p-2 border rounded-md"
-                  />
                 </div>
               ))}
             </div>
