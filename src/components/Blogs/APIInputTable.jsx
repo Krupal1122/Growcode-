@@ -130,7 +130,7 @@ export default function APIInputTable() {
       setFormData({ title: '', sections: [] });
       setSelectedImage(null);
       setImageUrl(null);
-      navigate('/admin/documents');
+      navigate('/admin/Blogs');
     } catch (error) {
       console.error('Error submitting form:', error.response?.data || error.message);
       alert('Error saving form data');
