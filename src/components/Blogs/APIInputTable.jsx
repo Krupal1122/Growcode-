@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { UploadCloud } from 'lucide-react';
 import axios from 'axios';
+import RichTextEditor from "react-simple-wysiwyg";
 
 const ImageUpload = ({ selectedImage, setSelectedImage, setImageUrl }) => {
   const handleImageChange = async (e) => {
@@ -72,7 +73,7 @@ export default function APIInputTable() {
       ...formData,
       sections: [
         ...formData.sections,
-        { subheading: '', questions: [{ questionText: '', answerText: '' }] },
+        { subheading: '', questions: [{ questionText: ''}] },
       ],
     });
   };
@@ -91,7 +92,7 @@ export default function APIInputTable() {
 
   const addQuestion = (sectionIndex) => {
     const newSections = [...formData.sections];
-    newSections[sectionIndex].questions.push({ questionText: '', answerText: '' });
+    newSections[sectionIndex].questions.push({ questionText: '' });
     setFormData({ ...formData, sections: newSections });
   };
 
@@ -179,7 +180,7 @@ export default function APIInputTable() {
                 key={questionIndex}
                 className="bg-gray-50 border border-gray-200 p-4 rounded-lg space-y-2"
               >
-                <input
+                {/* <input
                   type="text"
                   className="w-full border border-gray-300 p-2 rounded"
                   placeholder="Enter question text"
@@ -187,16 +188,15 @@ export default function APIInputTable() {
                   onChange={(e) =>
                     updateQuestion(sectionIndex, questionIndex, 'questionText', e.target.value)
                   }
-                />
-                <input
-                  type="text"
-                  className="w-full border border-gray-300 p-2 rounded"
-                  placeholder="Enter answer text (optional)"
-                  value={question.answerText}
-                  onChange={(e) =>
-                    updateQuestion(sectionIndex, questionIndex, 'answerText', e.target.value)
-                  }
-                />
+                  /> */}
+                <RichTextEditor
+                     value={question.questionText}
+                     onChange={(e) =>
+                       updateQuestion(sectionIndex, questionIndex, 'questionText', e.target.value)
+                     }
+                     className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                     style={{ minHeight: '150px' }}
+                   />
                 <button
                   onClick={() => removeQuestion(sectionIndex, questionIndex)}
                   className="text-red-500 text-sm hover:underline"

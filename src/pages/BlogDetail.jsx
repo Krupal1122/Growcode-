@@ -131,12 +131,11 @@ const BlogDetail = () => {
               <div key={index} className="mb-4">
                 {section.subheading && (
                   <li
-                    className={`text-base font-semibold mb-2 ${
-                      activeElement?.type === "section" &&
+                    className={`text-base font-semibold mb-2 ${activeElement?.type === "section" &&
                       activeElement?.value === section.subheading
-                        ? "text-blue-600"
-                        : "text-gray-800"
-                    }`}
+                      ? "text-blue-600"
+                      : "text-gray-800"
+                      }`}
                   >
                     {section.subheading}
                   </li>
@@ -146,14 +145,16 @@ const BlogDetail = () => {
                     {section.questions.map((question, qIndex) => (
                       <h3
                         key={qIndex}
-                        className={`text-sm mb-1 ${
-                          activeElement?.type === "question" &&
+                        className={`text-sm mb-1 ${activeElement?.type === "question" &&
                           activeElement?.value === question.questionText
-                            ? "text-blue-600"
-                            : "text-gray-600"
-                        }`}
+                          ? "text-blue-600"
+                          : "text-gray-600"
+                          }`}
                       >
-                        {question.questionText}
+                        <div
+                            className="question-heading font-medium text-gray-800"
+                            dangerouslySetInnerHTML={{ __html: question.questionText }}
+                          ></div>
                       </h3>
                     ))}
                   </ul>
@@ -173,7 +174,7 @@ const BlogDetail = () => {
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-50"></div>
             <div className="absolute bottom-4 left-4">
-            
+
             </div>
           </div>
           <div className="text-gray-600">
@@ -187,10 +188,10 @@ const BlogDetail = () => {
                     <ul className="list-circle pl-5 mt-1">
                       {section.questions.map((question, qIndex) => (
                         <li key={qIndex}>
-                          <div className="question-heading font-medium text-gray-800">
-                            {question.questionText}
-                          </div>
-                          <div className="text-gray-500 text-sm ml-4">{question.answerText}</div>
+                          <div
+                            className="question-heading font-medium text-gray-800"
+                            dangerouslySetInnerHTML={{ __html: question.questionText }}
+                          ></div>
                         </li>
                       ))}
                     </ul>
