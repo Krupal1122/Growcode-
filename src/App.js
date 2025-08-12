@@ -20,9 +20,9 @@ import Admin from "./components/Blogs/Admin";
 import APIInputTable from "./components/Blogs/APIInputTable";
 import FormCard from "./components/Blogs/FormCard";
 import FormDetail from "./components/Blogs/FormDetail";
+import EditForm from "./components/Blogs/EditForm"; // Updated import path
 
 // Temporary BlogPage replacement
-// If you want your homepage to show blogs, you can later replace <Hero /> with something else
 const BlogPage = () => <Hero />;
 
 const Layout = ({ children }) => {
@@ -84,6 +84,7 @@ const App = () => {
             <Route path="calendar" element={<div>Calendar Content</div>} />
             <Route path="Blogs" element={<FormCard />} />
             <Route path="Blogs/add" element={<APIInputTable />} />
+            <Route path="Blogs/edit/:id" element={<EditForm />} />
             <Route path="Blogs/form/:id" element={<FormDetail />} />
             <Route path="reports" element={<div>Reports Content</div>} />
           </Route>

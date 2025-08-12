@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 const FormCard = () => {
@@ -8,6 +8,7 @@ const FormCard = () => {
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10; // Number of items per page
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchForms = async () => {
@@ -35,6 +36,20 @@ const FormCard = () => {
     };
     fetchForms();
   }, []);
+
+  // Handle Delete
+  const handleDelete = async (id) => {
+    if (window.confirm('Are you sure you want to delete this form?')) {
+      try {
+        await axios.delete(`http://localhost:5000/api/forms/${id}`);
+        setForms(forms.filter((form) => form.id !== id));
+        alert('Form deleted successfully');
+      } catch (error) {
+        console.error('Error deleting form:', error);
+        setError('Failed to delete form. Please try again later.');
+      }
+    }
+  };
 
   // Calculate pagination details
   const totalPages = Math.ceil(forms.length / itemsPerPage);
@@ -159,7 +174,48 @@ const FormCard = () => {
                       <td className="px-6 py-4 text-gray-600 text-sm">
                         {form.date}
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="px-6 py-4 flex space-x-2">
+                        <Link
+                          to={`/admin/Blogs/edit/${form.id}`}
+                          state={{ blog: form }}
+                          className="inline-flex items-center bg-yellow-500 text-white px-4 py-2 rounded-full hover:bg-yellow-600 transform hover:scale-105 transition-all duration-300 shadow-sm text-sm font-medium"
+                        >
+                          Edit
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-4 w-4 ml-2"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                            />
+                          </svg>
+                        </Link>
+                        <button
+                          onClick={() => handleDelete(form.id)}
+                          className="inline-flex items-center bg-red-600 text-white px-4 py-2 rounded-full hover:bg-red-700 transform hover:scale-105 transition-all duration-300 shadow-sm text-sm font-medium"
+                        >
+                          Delete
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-4 w-4 ml-2"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M6 18L18 6M6 6l12 12"
+                            />
+                          </svg>
+                        </button>
                         <Link
                           to={`/blog/${form.id}`}
                           state={{ blog: form, from: 'admin' }}
