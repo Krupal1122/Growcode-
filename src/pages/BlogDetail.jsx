@@ -94,6 +94,18 @@ const BlogDetail = () => {
     };
   }, [blog?.sections]);
 
+  // Function to handle clicking on sidebar items and scroll to corresponding content
+  const scrollToElement = (id) => {
+    const element = document.getElementById(id);
+    if (element && contentRef.current) {
+      const offset = element.getBoundingClientRect().top + contentRef.current.scrollTop - 100; // Adjust offset as needed
+      contentRef.current.scrollTo({
+        top: offset,
+        behavior: "smooth",
+      });
+    }
+  };
+
   if (loading) {
     return <div className="text-center text-gray-600">Loading...</div>;
   }
@@ -131,11 +143,12 @@ const BlogDetail = () => {
               <div key={index} className="mb-4">
                 {section.subheading && (
                   <li
-                    className={`text-base font-semibold mb-2 ${activeElement?.type === "section" &&
-                      activeElement?.value === section.subheading
-                      ? "text-blue-600"
-                      : "text-gray-800"
-                      }`}
+                    className={`text-base font-semibold mb-2 cursor-pointer ${
+                      activeElement?.type === "section" && activeElement?.value === section.subheading
+                        ? "text-blue-600"
+                        : "text-gray-800"
+                    }`}
+                    onClick={() => scrollToElement(`section-${index}`)}
                   >
                     {section.subheading}
                   </li>
@@ -143,19 +156,20 @@ const BlogDetail = () => {
                 {section.questions.length > 0 && (
                   <ul className="list-disc pl-5">
                     {section.questions.map((question, qIndex) => (
-                      <h3
+                      <li
                         key={qIndex}
-                        className={`text-sm mb-1 ${activeElement?.type === "question" &&
-                          activeElement?.value === question.questionText
-                          ? "text-blue-600"
-                          : "text-gray-600"
-                          }`}
+                        className={`text-sm mb-1 cursor-pointer ${
+                          activeElement?.type === "question" && activeElement?.value === question.questionText
+                            ? "text-blue-600"
+                            : "text-gray-600"
+                        }`}
+                        onClick={() => scrollToElement(`question-${index}-${qIndex}`)}
                       >
                         <div
-                            className="question-heading font-medium text-gray-800"
-                            dangerouslySetInnerHTML={{ __html: question.questionText }}
-                          ></div>
-                      </h3>
+                          className="question-heading font-medium text-gray-800"
+                          dangerouslySetInnerHTML={{ __html: question.title }}
+                        ></div>
+                      </li>
                     ))}
                   </ul>
                 )}
@@ -173,15 +187,16 @@ const BlogDetail = () => {
               className="w-full h-64 object-cover rounded-lg"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-50"></div>
-            <div className="absolute bottom-4 left-4">
-
-            </div>
+            <div className="absolute bottom-4 left-4"></div>
           </div>
           <div className="text-gray-600">
             <ul className="list-disc pl-5 mt-2 text-gray-600">
               {blog.sections.map((section, index) => (
                 <li key={index}>
-                  <div className="section-heading font-semibold text-gray-800 mb-2">
+                  <div
+                    id={`section-${index}`}
+                    className="section-heading font-semibold text-gray-800 mb-2"
+                  >
                     {section.subheading || `Section ${index + 1}`}
                   </div>
                   {section.questions.length > 0 && (
@@ -189,6 +204,7 @@ const BlogDetail = () => {
                       {section.questions.map((question, qIndex) => (
                         <li key={qIndex}>
                           <div
+                            id={`question-${index}-${qIndex}`}
                             className="question-heading font-medium text-gray-800"
                             dangerouslySetInnerHTML={{ __html: question.questionText }}
                           ></div>
