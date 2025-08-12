@@ -122,61 +122,62 @@ const BlogDetail = () => {
     <div className="bg-white text-gray-800 font-sans w-screen min-h-screen flex">
       <div className="flex w-full h-full mt-16">
         {/* Sidebar */}
-        <div className="w-72 pr-4 sticky top-0 self-start h-screen overflow-y-auto bg-gray-50 p-4 ml-10">
-          <div className="bg-gray-100 p-4 rounded-lg">
-            <p className="text-gray-500 text-sm">Contributor</p>
-            <div className="flex items-center mt-2">
-              <img
-                src="https://img.freepik.com/free-photo/waist-up-portrait-handsome-serious-unshaven-male-keeps-hands-together-dressed-dark-blue-shirt-has-talk-with-interlocutor-stands-against-white-wall-self-confident-man-freelancer_273609-16320.jpg"
-                alt="Contributor"
-                className="w-10 h-10 rounded-full mr-2"
-              />
-              <div>
-                <p className="text-gray-800 font-medium">Unknown</p>
-                <p className="text-gray-500 text-sm">{blog.date}</p>
-              </div>
-            </div>
-            <p className="text-gray-500 text-sm mt-4">Reading Time: {readingTime}</p>
-          </div>
-          <div className="mt-6 border-l border-r border-gray-300 px-4 max-h-[80vh] overflow-y-auto">
-            {blog.sections.map((section, index) => (
-              <div key={index} className="mb-4">
-                {section.subheading && (
-                  <li
-                    className={`text-base font-semibold mb-2 cursor-pointer ${
-                      activeElement?.type === "section" && activeElement?.value === section.subheading
-                        ? "text-blue-600"
-                        : "text-gray-800"
-                    }`}
-                    onClick={() => scrollToElement(`section-${index}`)}
-                  >
-                    {section.subheading}
-                  </li>
-                )}
-                {section.questions.length > 0 && (
-                  <ul className="list-disc pl-5">
-                    {section.questions.map((question, qIndex) => (
-                      <li
-                        key={qIndex}
-                        className={`text-sm mb-1 cursor-pointer ${
-                          activeElement?.type === "question" && activeElement?.value === question.questionText
-                            ? "text-blue-600"
-                            : "text-gray-600"
-                        }`}
-                        onClick={() => scrollToElement(`question-${index}-${qIndex}`)}
-                      >
-                        <div
-                          className="question-heading font-medium text-gray-800"
-                          dangerouslySetInnerHTML={{ __html: question.title }}
-                        ></div>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
+        <div className="w-72 sticky top-4 self-start bg-white rounded-xl shadow-lg p-5 ml-10 overflow-y-auto max-h-[85vh]">
+  {/* Contributor Card */}
+  <div className="flex items-center gap-3 border-b border-gray-200 pb-4 mb-4">
+    <img
+      src="https://img.freepik.com/free-photo/waist-up-portrait-handsome-serious-unshaven-male-keeps-hands-together-dressed-dark-blue-shirt-has-talk-with-interlocutor-stands-against-white-wall-self-confident-man-freelancer_273609-16320.jpg"
+      alt="Contributor"
+      className="w-12 h-12 rounded-full object-cover"
+    />
+    <div>
+      <p className="text-gray-900 font-semibold">Unknown</p>
+      <p className="text-gray-500 text-xs">{blog.date}</p>
+      <p className="text-gray-400 text-xs">Reading Time: {readingTime}</p>
+    </div>
+  </div>
+
+  {/* Sections List */}
+  <div className="space-y-4">
+    {blog.sections.map((section, index) => (
+      <div key={index} className="space-y-1">
+        {section.subheading && (
+          <p
+            className={`text-sm font-semibold transition-colors cursor-pointer ${
+              activeElement?.type === "section" && activeElement?.value === section.subheading
+                ? "text-blue-600"
+                : "text-gray-800 hover:text-blue-500"
+            }`}
+            onClick={() => scrollToElement(`section-${index}`)}
+          >
+            {section.subheading}
+          </p>
+        )}
+        {section.questions.length > 0 && (
+          <ul className="space-y-1 pl-3 border-l-2 border-gray-200">
+            {section.questions.map((question, qIndex) => (
+              <li
+                key={qIndex}
+                className={`text-sm leading-snug transition-colors cursor-pointer ${
+                  activeElement?.type === "question" && activeElement?.value === question.questionText
+                    ? "text-blue-600"
+                    : "text-gray-500 hover:text-blue-500"
+                }`}
+                onClick={() => scrollToElement(`question-${index}-${qIndex}`)}
+              >
+                <div
+                  className="font-medium"
+                  dangerouslySetInnerHTML={{ __html: question.title }}
+                ></div>
+              </li>
             ))}
-          </div>
-        </div>
+          </ul>
+        )}
+      </div>
+    ))}
+  </div>
+</div>
+
         {/* Main Content */}
         <div className="flex-1 h-screen overflow-y-auto p-6" ref={contentRef}>
           <h1 className="text-4xl font-bold text-gray-900 mb-4">{blog.title}</h1>
