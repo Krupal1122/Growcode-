@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { useLocation, useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 
 const BlogDetail = () => {
@@ -11,7 +11,7 @@ const BlogDetail = () => {
   const [error, setError] = useState(null);
   const [activeElement, setActiveElement] = useState(null);
   const contentRef = useRef(null);
-  const readingTime = " ";
+  const readingTime = "5 min"; // Replace with actual logic if needed
 
   useEffect(() => {
     if (!blog) {
@@ -44,63 +44,98 @@ const BlogDetail = () => {
   }, [id, blog]);
 
   useEffect(() => {
+    if (contentRef.current) {
+      contentRef.current.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }, []);
+
+  useEffect(() => {
+    const debounce = (func, delay) => {
+      let timeoutId;
+      return (...args) => {
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => func(...args), delay);
+      };
+    };
+
     const handleScroll = () => {
+      if (!blog?.sections || !contentRef.current) return;
+
       const sectionElements = document.querySelectorAll(".section-heading");
       const questionElements = document.querySelectorAll(".question-heading");
-      let topElement = null;
+      let closestElement = null;
+      let minDistance = Infinity;
 
+      const allElements = [];
+
+      // Add sections
       sectionElements.forEach((section, index) => {
-        const rect = section.getBoundingClientRect();
-        if (rect.top <= 100 && rect.top >= -rect.height) {
-          topElement = {
-            type: "section",
-            value: blog.sections[index].subheading || `Section ${index + 1}`,
+        allElements.push({
+          element: section,
+          type: "section",
+          value: blog.sections[index].subheading || `Section ${index + 1}`,
+          index,
+        });
+      });
+
+      // Add questions
+      let questionCount = 0;
+      blog.sections.forEach((section, sIndex) => {
+        section.questions.forEach((question, qIndex) => {
+          const element = questionElements[questionCount];
+          if (element) {
+            allElements.push({
+              element,
+              type: "question",
+              value: question.questionText,
+              sIndex,
+              qIndex,
+            });
+          }
+          questionCount++;
+        });
+      });
+
+      // Find the element closest to the top of the content div
+      allElements.forEach((item) => {
+        const rect = item.element.getBoundingClientRect();
+        const contentRect = contentRef.current.getBoundingClientRect();
+        const distance = Math.abs(rect.top - contentRect.top); // Distance from top of content div
+        if (distance < minDistance && rect.top >= contentRect.top - rect.height && rect.top <= contentRect.top + window.innerHeight / 2) {
+          minDistance = distance;
+          closestElement = {
+            type: item.type,
+            value: item.value,
+            index: item.index || `${item.sIndex}-${item.qIndex}`,
           };
         }
       });
 
-      questionElements.forEach((question, qIndex) => {
-        const rect = question.getBoundingClientRect();
-        if (rect.top <= 100 && rect.top >= -rect.height) {
-          let questionCount = 0;
-          for (let i = 0; i < blog.sections.length; i++) {
-            const questions = blog.sections[i].questions;
-            for (let j = 0; j < questions.length; j++) {
-              if (questionCount === qIndex) {
-                topElement = {
-                  type: "question",
-                  value: questions[j].questionText,
-                };
-                return;
-              }
-              questionCount++;
-            }
-          }
-        }
-      });
-
-      setActiveElement(topElement);
+      setActiveElement(closestElement);
     };
+
+    const debouncedHandleScroll = debounce(handleScroll, 100);
 
     const contentElement = contentRef.current;
     if (contentElement) {
-      contentElement.addEventListener("scroll", handleScroll);
+      contentElement.addEventListener("scroll", debouncedHandleScroll);
     }
 
     return () => {
       if (contentElement) {
-        contentElement.removeEventListener("scroll", handleScroll);
+        contentElement.removeEventListener("scroll", debouncedHandleScroll);
       }
     };
   }, [blog?.sections]);
 
-  // Function to handle clicking on sidebar items and scroll to corresponding content
   const scrollToElement = (id) => {
     const element = document.getElementById(id);
     if (element && contentRef.current) {
-      const offset = element.getBoundingClientRect().top + contentRef.current.scrollTop - 100; // Adjust offset as needed
+      const contentRect = contentRef.current.getBoundingClientRect();
+      const elementRect = element.getBoundingClientRect();
+      const offsetTop = elementRect.top - contentRect.top + contentRef.current.scrollTop;
       contentRef.current.scrollTo({
-        top: offset,
+        top: offsetTop,
         behavior: "smooth",
       });
     }
@@ -123,60 +158,60 @@ const BlogDetail = () => {
       <div className="flex w-full h-full mt-16">
         {/* Sidebar */}
         <div className="w-72 sticky top-4 self-start bg-white rounded-xl shadow-lg p-5 ml-10 overflow-y-auto max-h-[85vh]">
-  {/* Contributor Card */}
-  <div className="flex items-center gap-3 border-b border-gray-200 pb-4 mb-4">
-    <img
-      src="https://img.freepik.com/free-photo/waist-up-portrait-handsome-serious-unshaven-male-keeps-hands-together-dressed-dark-blue-shirt-has-talk-with-interlocutor-stands-against-white-wall-self-confident-man-freelancer_273609-16320.jpg"
-      alt="Contributor"
-      className="w-12 h-12 rounded-full object-cover"
-    />
-    <div>
-      <p className="text-gray-900 font-semibold">Unknown</p>
-      <p className="text-gray-500 text-xs">{blog.date}</p>
-      <p className="text-gray-400 text-xs">Reading Time: {readingTime}</p>
-    </div>
-  </div>
+          <div className="flex items-center gap-3 border-b border-gray-200 pb-4 mb-4">
+            <img
+              src="https://img.freepik.com/free-photo/waist-up-portrait-handsome-serious-unshaven-male-keeps-hands-together-dressed-dark-blue-shirt-has-talk-with-interlocutor-stands-against-white-wall-self-confident-man-freelancer_273609-16320.jpg"
+              alt="Contributor"
+              className="w-12 h-12 rounded-full object-cover"
+            />
+            <div>
+              <p className="text-gray-900 font-semibold">Unknown</p>
+              <p className="text-gray-500 text-xs">{blog.date}</p>
+              <p className="text-gray-400 text-xs">Reading Time: {readingTime}</p>
+            </div>
+          </div>
 
-  {/* Sections List */}
-  <div className="space-y-4">
-    {blog.sections.map((section, index) => (
-      <div key={index} className="space-y-1">
-        {section.subheading && (
-          <p
-            className={`text-sm font-semibold transition-colors cursor-pointer ${
-              activeElement?.type === "section" && activeElement?.value === section.subheading
-                ? "text-blue-600"
-                : "text-gray-800 hover:text-blue-500"
-            }`}
-            onClick={() => scrollToElement(`section-${index}`)}
-          >
-            {section.subheading}
-          </p>
-        )}
-        {section.questions.length > 0 && (
-          <ul className="space-y-1 pl-3 border-l-2 border-gray-200">
-            {section.questions.map((question, qIndex) => (
-              <li
-                key={qIndex}
-                className={`text-sm leading-snug transition-colors cursor-pointer ${
-                  activeElement?.type === "question" && activeElement?.value === question.questionText
-                    ? "text-blue-600"
-                    : "text-gray-500 hover:text-blue-500"
-                }`}
-                onClick={() => scrollToElement(`question-${index}-${qIndex}`)}
-              >
-                <div
-                  className="font-medium"
-                  dangerouslySetInnerHTML={{ __html: question.title }}
-                ></div>
-              </li>
+          <div className="space-y-4">
+            {blog.sections.map((section, index) => (
+              <div key={index} className="space-y-1">
+                {section.subheading && (
+                  <p
+                    className={`text-sm font-semibold transition-colors duration-200 cursor-pointer ${
+                      activeElement?.type === "section" &&
+                      activeElement?.value === section.subheading
+                        ? "text-blue-600"
+                        : "text-gray-800 hover:text-blue-500"
+                    }`}
+                    onClick={() => scrollToElement(`section-${index}`)}
+                  >
+                    {section.subheading}
+                  </p>
+                )}
+                {section.questions.length > 0 && (
+                  <ul className="space-y-1 pl-3 border-l-2 border-gray-200">
+                    {section.questions.map((question, qIndex) => (
+                      <li
+                        key={qIndex}
+                        className={`text-sm leading-snug transition-colors duration-200 cursor-pointer ${
+                          activeElement?.type === "question" &&
+                          activeElement?.value === question.questionText
+                            ? "text-blue-600"
+                            : "text-gray-500 hover:text-blue-500"
+                        }`}
+                        onClick={() => scrollToElement(`question-${index}-${qIndex}`)}
+                      >
+                        {/* <div
+                          className="font-medium"
+                          dangerouslySetInnerHTML={{ __html: question.questionText }}
+                        ></div> */}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
             ))}
-          </ul>
-        )}
-      </div>
-    ))}
-  </div>
-</div>
+          </div>
+        </div>
 
         {/* Main Content */}
         <div className="flex-1 h-screen overflow-y-auto p-6" ref={contentRef}>
@@ -188,7 +223,6 @@ const BlogDetail = () => {
               className="w-full h-64 object-cover rounded-lg"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-50"></div>
-            <div className="absolute bottom-4 left-4"></div>
           </div>
           <div className="text-gray-600">
             <ul className="list-disc pl-5 mt-2 text-gray-600">
