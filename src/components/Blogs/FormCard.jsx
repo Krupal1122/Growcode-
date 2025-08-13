@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import Swal from 'sweetalert2'; // Import SweetAlert2
 
 const FormCard = () => {
   const [forms, setForms] = useState([]);
@@ -39,14 +40,51 @@ const FormCard = () => {
 
   // Handle Delete
   const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this form?')) {
+    // Show SweetAlert2 confirmation dialog
+    const result = await Swal.fire({
+      title: 'Are you sure?',
+      text: 'Do you want to delete this form? This action cannot be undone!',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Yes, delete it!',
+      cancelButtonText: 'Cancel',
+      customClass: {
+        popup: 'rounded-xl shadow-lg',
+        confirmButton: 'px-4 py-2 rounded-full',
+        cancelButton: 'px-4 py-2 rounded-full',
+      },
+    });
+
+    if (result.isConfirmed) {
       try {
         await axios.delete(`http://localhost:5000/api/forms/${id}`);
         setForms(forms.filter((form) => form.id !== id));
-        alert('Form deleted successfully');
+        // Show success message
+        Swal.fire({
+          title: 'Deleted!',
+          text: 'Form deleted successfully.',
+          icon: 'success',
+          confirmButtonColor: '#3085d6',
+          customClass: {
+            popup: 'rounded-xl shadow-lg',
+            confirmButton: 'px-4 py-2 rounded-full',
+          },
+        });
       } catch (error) {
         console.error('Error deleting form:', error);
-        setError('Failed to delete form. Please try again later.');
+        // Show error message
+        Swal.fire({
+          title: 'Error!',
+          text: 'Failed to delete form. Please try again later.',
+          icon: 'error',
+          confirmButtonColor: '#d33',
+          customClass: {
+            popup: 'rounded-xl shadow-lg',
+            confirmButton: 'px-4 py-2 rounded-full',
+          },
+        });
       }
     }
   };
@@ -125,7 +163,9 @@ const FormCard = () => {
       {/* Error State */}
       {error && (
         <div className="bg-white rounded-xl shadow-lg p-6 text-center">
-          <p className="text-red-600 text-lg font-medium">{error}</p>
+          <div className="flex items-center justify-center h-32">
+            <p className="text-red-600 text-lg font-medium">{error}</p>
+          </div>
         </div>
       )}
 

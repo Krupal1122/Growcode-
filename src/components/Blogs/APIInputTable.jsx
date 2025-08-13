@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { UploadCloud } from 'lucide-react';
 import axios from 'axios';
-import RichTextEditor from "react-simple-wysiwyg";
+import RichTextEditor from 'react-simple-wysiwyg';
+import Swal from 'sweetalert2'; // Import SweetAlert2
 
 const ImageUpload = ({ selectedImage, setSelectedImage, setImageUrl }) => {
   const handleImageChange = async (e) => {
@@ -20,6 +21,17 @@ const ImageUpload = ({ selectedImage, setSelectedImage, setImageUrl }) => {
         setImageUrl(response.data.url);
       } catch (error) {
         console.error('Error uploading image:', error);
+        // Show error dialog for image upload failure
+        Swal.fire({
+          title: 'Error!',
+          text: 'Failed to upload image. Please try again.',
+          icon: 'error',
+          confirmButtonColor: '#d33',
+          customClass: {
+            popup: 'rounded-xl shadow-lg',
+            confirmButton: 'px-4 py-2 rounded-full',
+          },
+        });
       }
     }
   };
@@ -56,20 +68,18 @@ const ImageUpload = ({ selectedImage, setSelectedImage, setImageUrl }) => {
 };
 
 export default function APIInputTable() {
-  const location = useLocation(); // Get the location object to access passed state
+  const location = useLocation();
   const navigate = useNavigate();
 
-  // Initialize state with passed form data (for editing) or default (for creating)
   const [formData, setFormData] = useState({
     title: location.state?.blog?.title || '',
     sections: location.state?.blog?.sections || [],
   });
   const [selectedImage, setSelectedImage] = useState(location.state?.blog?.image || null);
   const [imageUrl, setImageUrl] = useState(location.state?.blog?.image || null);
-  const [isEditing, setIsEditing] = useState(!!location.state?.blog); // Determine if in edit mode
-  const formId = location.state?.blog?.id; // Get form ID for editing
+  const [isEditing, setIsEditing] = useState(!!location.state?.blog);
+  const formId = location.state?.blog?.id;
 
-  // Update formData if location.state changes (optional, for safety)
   useEffect(() => {
     if (location.state?.blog) {
       setFormData({
@@ -128,11 +138,29 @@ export default function APIInputTable() {
 
   const handleSubmit = async () => {
     if (!formData.title) {
-      alert('Please enter a form title');
+      Swal.fire({
+        title: 'Missing Title!',
+        text: 'Please enter a form title.',
+        icon: 'warning',
+        confirmButtonColor: '#3085d6',
+        customClass: {
+          popup: 'rounded-xl shadow-lg',
+          confirmButton: 'px-4 py-2 rounded-full',
+        },
+      });
       return;
     }
     if (!imageUrl) {
-      alert('Please upload an image');
+      Swal.fire({
+        title: 'Missing Image!',
+        text: 'Please upload an image.',
+        icon: 'warning',
+        confirmButtonColor: '#3085d6',
+        customClass: {
+          popup: 'rounded-xl shadow-lg',
+          confirmButton: 'px-4 py-2 rounded-full',
+        },
+      });
       return;
     }
 
@@ -148,13 +176,35 @@ export default function APIInputTable() {
         await axios.put(`http://localhost:5000/api/forms/${formId}`, payload, {
           headers: { 'Content-Type': 'application/json' },
         });
-        alert('Form updated successfully!');
+        Swal.fire({
+          title: 'Success!',
+          text: 'Form updated successfully!',
+          icon: 'success',
+          confirmButtonColor: '#3085d6',
+          customClass: {
+            popup: 'rounded-xl shadow-lg',
+            confirmButton: 'px-4 py-2 rounded-full',
+          },
+          timer: 2000,
+          timerProgressBar: true,
+        });
       } else {
         // Create new form (POST request)
         await axios.post('http://localhost:5000/api/forms', payload, {
           headers: { 'Content-Type': 'application/json' },
         });
-        alert('Form data saved to MongoDB!');
+        Swal.fire({
+          title: 'Success!',
+          text: 'Form data saved to MongoDB!',
+          icon: 'success',
+          confirmButtonColor: '#3085d6',
+          customClass: {
+            popup: 'rounded-xl shadow-lg',
+            confirmButton: 'px-4 py-2 rounded-full',
+          },
+          timer: 2000,
+          timerProgressBar: true,
+        });
       }
 
       // Reset form and navigate back
@@ -165,7 +215,16 @@ export default function APIInputTable() {
       navigate('/admin/Blogs');
     } catch (error) {
       console.error('Error submitting form:', error.response?.data || error.message);
-      alert(isEditing ? 'Error updating form data' : 'Error saving form data');
+      Swal.fire({
+        title: 'Error!',
+        text: isEditing ? 'Error updating form data.' : 'Error saving form data.',
+        icon: 'error',
+        confirmButtonColor: '#d33',
+        customClass: {
+          popup: 'rounded-xl shadow-lg',
+          confirmButton: 'px-4 py-2 rounded-full',
+        },
+      });
     }
   };
 
