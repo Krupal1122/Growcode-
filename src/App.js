@@ -22,8 +22,9 @@ import FormCard from "./components/Blogs/FormCard";
 import FormDetail from "./components/Blogs/FormDetail";
 import EditForm from "./components/Blogs/EditForm";
 import { SidebarProvider } from "./SidebarContext";
+import ProjectDetailsForm from "./components/projects/ProjectDetailsForm";
+import ProjectDetailsPage from "./components/projects/ProjectDetailsPage";
 
-// Lazy load Admin
 const Admin = lazy(() => import("./components/Blogs/Admin"));
 
 const BlogPage = () => <Hero />;
@@ -82,7 +83,9 @@ const App = () => {
               >
                 <Route path="dashboard" element={<div>Dashboard Content</div>} />
                 <Route path="team" element={<div>Team Content</div>} />
-                <Route path="projects" element={<div>Projects Content</div>} />
+                <Route path="projects" element={<ProjectDetailsPage />} />
+                <Route path="projects/add" element={<ProjectDetailsForm />} />
+                <Route path="projects/edit/:id" element={<ProjectDetailsForm />} />
                 <Route path="calendar" element={<div>Calendar Content</div>} />
                 <Route path="Blogs" element={<FormCard />} />
                 <Route path="Blogs/add" element={<APIInputTable />} />
