@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+// src/App.js
+import React, { useState, Suspense, lazy } from "react";
 import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import Navbar from "./pages/Navbar";
 import Hero from "./pages/Hero";
@@ -16,13 +17,15 @@ import Blogs from "./pages/Blogs";
 import BlogDetail from "./pages/BlogDetail";
 import Login from "./pages/Login";
 import ProtectedRoute from "./pages/ProtectedRoute";
-import Admin from "./components/Blogs/Admin";
 import APIInputTable from "./components/Blogs/APIInputTable";
 import FormCard from "./components/Blogs/FormCard";
 import FormDetail from "./components/Blogs/FormDetail";
-import EditForm from "./components/Blogs/EditForm"; // Updated import path
+import EditForm from "./components/Blogs/EditForm";
+import { SidebarProvider } from "./SidebarContext";
 
-// Temporary BlogPage replacement
+// Lazy load Admin
+const Admin = lazy(() => import("./components/Blogs/Admin"));
+
 const BlogPage = () => <Hero />;
 
 const Layout = ({ children }) => {
@@ -45,51 +48,52 @@ const App = () => {
 
   return (
     <Router>
-      <Layout>
-        <Routes>
-          {/* Public Routes */}
-          <Route path="/" element={<BlogPage />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/services" element={<GrowcodeServices />} />
-          <Route path="/career" element={<Jobdata />} />
-          <Route path="/portfolio" element={<Projects />} />
-          <Route path="/blogs" element={<Blogs />} />
-          <Route path="/blog/:id" element={<BlogDetail />} />
-          <Route path="/contact" element={<Growcodecontact />} />
-          <Route
-            path="/login"
-            element={<Login setIsAuthenticated={setIsAuthenticated} />}
-          />
-
-          {/* Admin Routes */}
-          <Route
-            path="/blogs-admin"
-            element={
-              <ProtectedRoute isAuthenticated={isAuthenticated}>
-                <Blogs />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin"
-            element={
-              <ProtectedRoute isAuthenticated={isAuthenticated}>
-                <Admin />
-              </ProtectedRoute>
-            }
-          >
-            <Route path="dashboard" element={<div>Dashboard Content</div>} />
-            <Route path="team" element={<div>Team Content</div>} />
-            <Route path="projects" element={<div>Projects Content</div>} />
-            <Route path="calendar" element={<div>Calendar Content</div>} />
-            <Route path="Blogs" element={<FormCard />} />
-            <Route path="Blogs/add" element={<APIInputTable />} />
-            <Route path="Blogs/edit/:id" element={<APIInputTable />} />
-            <Route path="Blogs/form/:id" element={<FormDetail />} />
-            <Route path="reports" element={<div>Reports Content</div>} />
-          </Route>
-        </Routes>
-      </Layout>
+      <SidebarProvider>
+        <Layout>
+          <Suspense fallback={<div>Loading...</div>}>
+            <Routes>
+              <Route path="/" element={<BlogPage />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/services" element={<GrowcodeServices />} />
+              <Route path="/career" element={<Jobdata />} />
+              <Route path="/portfolio" element={<Projects />} />
+              <Route path="/blogs" element={<Blogs />} />
+              <Route path="/blog/:id" element={<BlogDetail />} />
+              <Route path="/contact" element={<Growcodecontact />} />
+              <Route
+                path="/login"
+                element={<Login setIsAuthenticated={setIsAuthenticated} />}
+              />
+              <Route
+                path="/blogs-admin"
+                element={
+                  <ProtectedRoute isAuthenticated={isAuthenticated}>
+                    <Blogs />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin"
+                element={
+                  <ProtectedRoute isAuthenticated={isAuthenticated}>
+                    <Admin />
+                  </ProtectedRoute>
+                }
+              >
+                <Route path="dashboard" element={<div>Dashboard Content</div>} />
+                <Route path="team" element={<div>Team Content</div>} />
+                <Route path="projects" element={<div>Projects Content</div>} />
+                <Route path="calendar" element={<div>Calendar Content</div>} />
+                <Route path="Blogs" element={<FormCard />} />
+                <Route path="Blogs/add" element={<APIInputTable />} />
+                <Route path="Blogs/edit/:id" element={<APIInputTable />} />
+                <Route path="Blogs/form/:id" element={<FormDetail />} />
+                <Route path="reports" element={<div>Reports Content</div>} />
+              </Route>
+            </Routes>
+          </Suspense>
+        </Layout>
+      </SidebarProvider>
     </Router>
   );
 };

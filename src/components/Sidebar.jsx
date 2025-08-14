@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import React from "react";
+import { Link, useLocation } from "react-router-dom";
 import {
   Home,
   Briefcase,
@@ -8,6 +8,7 @@ import {
   FileText,
   BarChart,
 } from "lucide-react";
+import { useSidebar } from "../SidebarContext"; // Adjusted import path
 
 const menuItems = [
   { label: "Dashboard", to: "/admin/dashboard", icon: <Home size={20} /> },
@@ -20,11 +21,7 @@ const menuItems = [
 
 function Sidebar() {
   const location = useLocation();
-  const [isCollapsed, setIsCollapsed] = useState(false);
-
-  const handleSidebarToggle = () => {
-    setIsCollapsed(!isCollapsed);
-  };
+  const { isCollapsed, toggleSidebar } = useSidebar();
 
   return (
     <div
@@ -32,10 +29,9 @@ function Sidebar() {
         isCollapsed ? "w-16" : "w-64"
       }`}
     >
-      {/* Floating Toggle Button */}
       <button
-        onClick={handleSidebarToggle}
-        className="absolute top-6 -right-5 w-12 h-12 bg-white text-black rounded-full flex items-center justify-center shadow-2xl  transition-colors border border-g"
+        onClick={toggleSidebar}
+        className="absolute top-6 -right-5 w-12 h-12 bg-white text-black rounded-full flex items-center justify-center shadow-2xl transition-colors border border-gray-300"
         aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
       >
         <svg
@@ -54,7 +50,6 @@ function Sidebar() {
         </svg>
       </button>
 
-      {/* Logo */}
       <div className="p-6 text-center border-b border-gray-700">
         <h1
           className={`text-2xl font-extrabold tracking-wide transition-all duration-300 ${
@@ -65,7 +60,6 @@ function Sidebar() {
         </h1>
       </div>
 
-      {/* Menu Items - grow so footer stays pinned */}
       <ul className="p-4 space-y-2 flex-grow overflow-y-auto no-scrollbar">
         {menuItems.map((item, idx) => {
           const isActive = location.pathname === item.to;
@@ -87,7 +81,6 @@ function Sidebar() {
         })}
       </ul>
 
-      {/* User Profile Section */}
       <div
         className={`p-4 border-t border-gray-700 bg-gray-900/70 backdrop-blur-md transition-all duration-300 ${
           isCollapsed ? "opacity-0 pointer-events-none" : "opacity-100"
