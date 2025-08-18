@@ -6,6 +6,7 @@ const PortfolioPage = () => {
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [activeCategory, setActiveCategory] = useState("All");
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -23,6 +24,7 @@ const PortfolioPage = () => {
             ? project.services.split(", ").map((s) => s.trim())
             : [],
           liveView: project.liveView || "#",
+          category: project.category || "General",
         }));
 
         setProjects(formattedProjects);
@@ -37,11 +39,22 @@ const PortfolioPage = () => {
     fetchProjects();
   }, []);
 
+  // Categories
+  const categories = ["All", "Mobile", "UI/UX", "Website"];
+
+  // Filter projects
+  const filteredProjects =
+    activeCategory === "All"
+      ? projects
+      : projects.filter(
+          (p) => p.category.toLowerCase() === activeCategory.toLowerCase()
+        );
+
   return (
     <section className="bg-gray-50 py-24 px-6 font-sans min-h-screen">
       <div className="max-w-full mx-auto">
         {/* Header */}
-        <div className="text-center mb-16">
+        <div className="text-center mb-10">
           <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-4">
             Our Portfolio
           </h2>
@@ -50,6 +63,25 @@ const PortfolioPage = () => {
             a team of experts, we build what you need most to launch your
             business online.
           </p>
+        </div>
+
+        {/* Category Filter */}
+        <div className="flex justify-center mb-16">
+          <div className="flex space-x-6 bg-white border rounded-full px-6 py-3 shadow-sm">
+            {categories.map((cat) => (
+              <button
+                key={cat}
+                onClick={() => setActiveCategory(cat)}
+                className={`text-lg font-medium transition ${
+                  activeCategory === cat
+                    ? "text-blue-600 border-b-2 border-blue-600"
+                    : "text-gray-500 hover:text-gray-800"
+                }`}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Loading */}
@@ -92,8 +124,8 @@ const PortfolioPage = () => {
         {/* Projects */}
         {!loading && !error && (
           <div className="space-y-20">
-            {projects.length > 0 ? (
-              projects.map((project, index) => (
+            {filteredProjects.length > 0 ? (
+              filteredProjects.map((project, index) => (
                 <div
                   key={index}
                   className={`flex w-full items-center ${
@@ -148,7 +180,7 @@ const PortfolioPage = () => {
               ))
             ) : (
               <div className="text-center text-gray-500 text-xl py-12">
-                No projects found.
+                No projects found in this category.
               </div>
             )}
           </div>
