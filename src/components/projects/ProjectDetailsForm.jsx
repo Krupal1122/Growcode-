@@ -1,4 +1,3 @@
-// src/components/projects/ProjectDetailsForm.js
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import axios from "axios";
@@ -37,7 +36,6 @@ const ProjectDetailsForm = () => {
       setSelectedImage(location.state.project.image || null);
       setImageUrl(location.state.project.image || null);
       setIsEditing(true);
-      // Optionally, initialize dynamicFields if editing and backend supports it
       setDynamicFields(location.state.project.dynamicFields || []);
     }
   }, [location.state]);
@@ -74,12 +72,10 @@ const ProjectDetailsForm = () => {
       const tempImageUrl = URL.createObjectURL(file);
 
       if (index !== null) {
-        // Update dynamic field image
         const updatedFields = [...dynamicFields];
         updatedFields[index] = { ...updatedFields[index], tempImageUrl };
         setDynamicFields(updatedFields);
       } else {
-        // Update main image
         setSelectedImage(tempImageUrl);
       }
 
@@ -119,6 +115,40 @@ const ProjectDetailsForm = () => {
     setDynamicFields([...dynamicFields, { type, value: "", tempImageUrl: null }]);
   };
 
+  const removeDynamicField = (index) => {
+    Swal.fire({
+      title: "Are you sure?",
+      text: "Do you want to remove this field?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, remove it!",
+      customClass: {
+        popup: "rounded-xl shadow-lg",
+        confirmButton: "px-4 py-2 rounded-full",
+        cancelButton: "px-4 py-2 rounded-full",
+      },
+    }).then((result) => {
+      if (result.isConfirmed) {
+        const updatedFields = dynamicFields.filter((_, i) => i !== index);
+        setDynamicFields(updatedFields);
+        Swal.fire({
+          title: "Removed!",
+          text: "The field has been removed.",
+          icon: "success",
+          confirmButtonColor: "#3085d6",
+          customClass: {
+            popup: "rounded-xl shadow-lg",
+            confirmButton: "px-4 py-2 rounded-full",
+          },
+          timer: 1500,
+          timerProgressBar: true,
+        });
+      }
+    });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -131,7 +161,6 @@ const ProjectDetailsForm = () => {
     if (!formData.timelines.trim()) errors.push("Please enter timelines.");
     if (!formData.services.trim()) errors.push("Please enter services provided.");
 
-    // Validate dynamic fields
     dynamicFields.forEach((field, index) => {
       if (field.type === "image" && !field.value) {
         errors.push(`Please upload an image for dynamic field ${index + 1}.`);
@@ -385,7 +414,7 @@ const ProjectDetailsForm = () => {
         {/* Dynamic Fields */}
         <div className="lg:col-span-2">
           {dynamicFields.map((field, index) => (
-            <div key={index} className="mb-4">
+            <div key={index} className="mb-4 relative">
               {field.type === "image" && (
                 <div>
                   <label className="block text-gray-700 font-medium mb-2">
@@ -465,6 +494,27 @@ const ProjectDetailsForm = () => {
                   />
                 </div>
               )}
+              <button
+                type="button"
+                onClick={() => removeDynamicField(index)}
+                className="absolute top-0 right-0  text-red-500 p-2 rounded-full hover:bg-red-600 transition"
+                title="Remove Field"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5-4h4a1 1 0 011 1v1H9V4a1 1 0 011-1zm-5 4h12"
+                  />
+                </svg>
+              </button>
             </div>
           ))}
         </div>
