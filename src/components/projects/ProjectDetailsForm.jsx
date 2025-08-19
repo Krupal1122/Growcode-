@@ -1,6 +1,6 @@
 // src/components/projects/ProjectDetailsForm.js
 import React, { useState, useEffect } from "react";
-import { useNavigate, useLocation, Link } from "react-router-dom"; // Added Link import
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import axios from "axios";
 import Swal from "sweetalert2";
 
@@ -21,6 +21,7 @@ const ProjectDetailsForm = () => {
   const [imageUrl, setImageUrl] = useState(location.state?.project?.image || null);
   const [isEditing, setIsEditing] = useState(!!location.state?.project);
   const [isUploading, setIsUploading] = useState(false);
+  const [dynamicFields, setDynamicFields] = useState([]); // State for dynamic fields
   const projectId = location.state?.project?.id;
 
   useEffect(() => {
@@ -36,6 +37,8 @@ const ProjectDetailsForm = () => {
       setSelectedImage(location.state.project.image || null);
       setImageUrl(location.state.project.image || null);
       setIsEditing(true);
+      // Optionally, initialize dynamicFields if editing and backend supports it
+      setDynamicFields(location.state.project.dynamicFields || []);
     }
   }, [location.state]);
 
@@ -44,7 +47,13 @@ const ProjectDetailsForm = () => {
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleImageChange = async (e) => {
+  const handleDynamicFieldChange = (index, value) => {
+    const updatedFields = [...dynamicFields];
+    updatedFields[index] = { ...updatedFields[index], value };
+    setDynamicFields(updatedFields);
+  };
+
+  const handleImageChange = async (e, index = null) => {
     const file = e.target.files[0];
     if (file) {
       if (file.size > MAX_IMAGE_SIZE_MB * 1024 * 1024) {
@@ -62,7 +71,17 @@ const ProjectDetailsForm = () => {
       }
 
       setIsUploading(true);
-      setSelectedImage(URL.createObjectURL(file));
+      const tempImageUrl = URL.createObjectURL(file);
+
+      if (index !== null) {
+        // Update dynamic field image
+        const updatedFields = [...dynamicFields];
+        updatedFields[index] = { ...updatedFields[index], tempImageUrl };
+        setDynamicFields(updatedFields);
+      } else {
+        // Update main image
+        setSelectedImage(tempImageUrl);
+      }
 
       const formData = new FormData();
       formData.append("file", file);
@@ -71,7 +90,13 @@ const ProjectDetailsForm = () => {
         const response = await axios.post("http://localhost:5000/api/upload", formData, {
           headers: { "Content-Type": "multipart/form-data" },
         });
-        setImageUrl(response.data.url);
+        if (index !== null) {
+          const updatedFields = [...dynamicFields];
+          updatedFields[index] = { ...updatedFields[index], value: response.data.url };
+          setDynamicFields(updatedFields);
+        } else {
+          setImageUrl(response.data.url);
+        }
       } catch (error) {
         console.error("Error uploading image:", error);
         Swal.fire({
@@ -90,6 +115,10 @@ const ProjectDetailsForm = () => {
     }
   };
 
+  const addDynamicField = (type) => {
+    setDynamicFields([...dynamicFields, { type, value: "", tempImageUrl: null }]);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -101,6 +130,15 @@ const ProjectDetailsForm = () => {
     if (!formData.liveView.trim()) errors.push("Please enter a live view link.");
     if (!formData.timelines.trim()) errors.push("Please enter timelines.");
     if (!formData.services.trim()) errors.push("Please enter services provided.");
+
+    // Validate dynamic fields
+    dynamicFields.forEach((field, index) => {
+      if (field.type === "image" && !field.value) {
+        errors.push(`Please upload an image for dynamic field ${index + 1}.`);
+      } else if ((field.type === "title" || field.type === "description") && !field.value.trim()) {
+        errors.push(`Please enter a value for ${field.type} field ${index + 1}.`);
+      }
+    });
 
     if (errors.length > 0) {
       Swal.fire({
@@ -139,6 +177,10 @@ const ProjectDetailsForm = () => {
         liveView: formData.liveView.trim(),
         timelines: formData.timelines.trim(),
         services: formData.services.trim(),
+        dynamicFields: dynamicFields.map((field) => ({
+          type: field.type,
+          value: field.value.trim ? field.value.trim() : field.value,
+        })),
       };
 
       if (isEditing) {
@@ -185,6 +227,7 @@ const ProjectDetailsForm = () => {
       });
       setSelectedImage(null);
       setImageUrl(null);
+      setDynamicFields([]);
       setIsEditing(false);
       navigate("/admin/projects");
     } catch (error) {
@@ -210,7 +253,7 @@ const ProjectDetailsForm = () => {
         {isEditing ? "✏️ Edit Project" : "📝 Add Project"}
       </h2>
       <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Image Upload */}
+        {/* Main Image Upload */}
         <div className="lg:col-span-2">
           <label className="block text-gray-700 font-medium mb-2">Project Image</label>
           <label
@@ -337,6 +380,118 @@ const ProjectDetailsForm = () => {
             className="w-full border border-gray-300 rounded-lg p-3 mt-1 focus:ring-2 focus:ring-blue-500"
             rows="4"
           />
+        </div>
+
+        {/* Dynamic Fields */}
+        <div className="lg:col-span-2">
+          {dynamicFields.map((field, index) => (
+            <div key={index} className="mb-4">
+              {field.type === "image" && (
+                <div>
+                  <label className="block text-gray-700 font-medium mb-2">
+                    Dynamic Image {index + 1}
+                  </label>
+                  <label
+                    htmlFor={`dynamicImageUpload-${index}`}
+                    className="w-full flex flex-col items-center justify-center border-2 border-dashed border-blue-400 rounded-lg p-8 cursor-pointer hover:border-blue-600 transition"
+                  >
+                    {field.tempImageUrl ? (
+                      <img
+                        src={field.tempImageUrl}
+                        alt={`Dynamic Preview ${index + 1}`}
+                        className="max-h-64 object-contain mb-3 rounded-lg"
+                      />
+                    ) : (
+                      <>
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-12 w-12 text-blue-500 mb-3"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            d="M3 15a4 4 0 014-4h1a4 4 0 018 0h1a4 4 0 014 4v5H3v-5z"
+                          />
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            d="M12 11V3m0 0l-4 4m4-4l4 4"
+                          />
+                        </svg>
+                        <span className="text-blue-500 font-medium">
+                          {isUploading ? "Uploading..." : `Click to upload image ${index + 1}`}
+                        </span>
+                      </>
+                    )}
+                    <input
+                      id={`dynamicImageUpload-${index}`}
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => handleImageChange(e, index)}
+                      className="hidden"
+                      disabled={isUploading}
+                    />
+                  </label>
+                </div>
+              )}
+              {field.type === "title" && (
+                <div>
+                  <label className="block text-gray-700 font-medium">Dynamic Title {index + 1}</label>
+                  <input
+                    type="text"
+                    value={field.value}
+                    onChange={(e) => handleDynamicFieldChange(index, e.target.value)}
+                    placeholder={`e.g., Dynamic Title ${index + 1}`}
+                    className="w-full border border-gray-300 rounded-lg p-3 mt-1 focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              )}
+              {field.type === "description" && (
+                <div>
+                  <label className="block text-gray-700 font-medium">
+                    Dynamic Description {index + 1}
+                  </label>
+                  <textarea
+                    value={field.value}
+                    onChange={(e) => handleDynamicFieldChange(index, e.target.value)}
+                    placeholder={`e.g., Description ${index + 1}`}
+                    className="w-full border border-gray-300 rounded-lg p-3 mt-1 focus:ring-2 focus:ring-blue-500"
+                    rows="4"
+                  />
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+
+        {/* Add Buttons */}
+        <div className="lg:col-span-2 flex gap-4 mb-4">
+          <button
+            type="button"
+            onClick={() => addDynamicField("image")}
+            className="bg-green-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-green-600 transition"
+          >
+            Add Image
+          </button>
+          <button
+            type="button"
+            onClick={() => addDynamicField("title")}
+            className="bg-green-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-green-600 transition"
+          >
+            Add Title
+          </button>
+          <button
+            type="button"
+            onClick={() => addDynamicField("description")}
+            className="bg-green-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-green-600 transition"
+          >
+            Add Description
+          </button>
         </div>
 
         {/* Submit and Cancel Buttons */}
