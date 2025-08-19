@@ -20,7 +20,7 @@ const ProjectDetailsForm = () => {
   const [imageUrl, setImageUrl] = useState(location.state?.project?.image || null);
   const [isEditing, setIsEditing] = useState(!!location.state?.project);
   const [isUploading, setIsUploading] = useState(false);
-  const [dynamicFields, setDynamicFields] = useState([]); // State for dynamic fields
+  const [dynamicFields, setDynamicFields] = useState(location.state?.project?.dynamicFields || []);
   const projectId = location.state?.project?.id;
 
   useEffect(() => {
@@ -36,7 +36,12 @@ const ProjectDetailsForm = () => {
       setSelectedImage(location.state.project.image || null);
       setImageUrl(location.state.project.image || null);
       setIsEditing(true);
-      setDynamicFields(location.state.project.dynamicFields || []);
+      setDynamicFields(
+        location.state.project.dynamicFields?.map((field) => ({
+          ...field,
+          tempImageUrl: field.type === "image" ? field.value : null,
+        })) || []
+      );
     }
   }, [location.state]);
 
@@ -53,61 +58,88 @@ const ProjectDetailsForm = () => {
 
   const handleImageChange = async (e, index = null) => {
     const file = e.target.files[0];
-    if (file) {
-      if (file.size > MAX_IMAGE_SIZE_MB * 1024 * 1024) {
-        Swal.fire({
-          title: "File Too Large!",
-          text: `Image size must be less than ${MAX_IMAGE_SIZE_MB}MB.`,
-          icon: "warning",
-          confirmButtonColor: "#3085d6",
-          customClass: {
-            popup: "rounded-xl shadow-lg",
-            confirmButton: "px-4 py-2 rounded-full",
-          },
-        });
-        return;
+    console.log("File selected:", file); // Debug: Check if file is selected
+    if (!file) {
+      Swal.fire({
+        title: "No File Selected!",
+        text: "Please select an image to upload.",
+        icon: "warning",
+        confirmButtonColor: "#3085d6",
+        customClass: {
+          popup: "rounded-xl shadow-lg",
+          confirmButton: "px-4 py-2 rounded-full",
+        },
+      });
+      return;
+    }
+
+    if (file.size > MAX_IMAGE_SIZE_MB * 1024 * 1024) {
+      Swal.fire({
+        title: "File Too Large!",
+        text: `Image size must be less than ${MAX_IMAGE_SIZE_MB}MB.`,
+        icon: "warning",
+        confirmButtonColor: "#3085d6",
+        customClass: {
+          popup: "rounded-xl shadow-lg",
+          confirmButton: "px-4 py-2 rounded-full",
+        },
+      });
+      return;
+    }
+
+    setIsUploading(true);
+    const tempImageUrl = URL.createObjectURL(file);
+    console.log("Temp image URL:", tempImageUrl); // Debug: Check temp URL
+
+    if (index !== null) {
+      const updatedFields = [...dynamicFields];
+      updatedFields[index] = { ...updatedFields[index], tempImageUrl };
+      setDynamicFields(updatedFields);
+    } else {
+      setSelectedImage(tempImageUrl);
+    }
+
+    const uploadFormData = new FormData();
+    uploadFormData.append("file", file);
+
+    try {
+      const response = await axios.post("http://localhost:5000/api/upload", uploadFormData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      console.log("Upload response:", response.data); // Debug: Check server response
+      if (!response.data.url) {
+        throw new Error("No URL returned from server");
       }
-
-      setIsUploading(true);
-      const tempImageUrl = URL.createObjectURL(file);
-
       if (index !== null) {
         const updatedFields = [...dynamicFields];
-        updatedFields[index] = { ...updatedFields[index], tempImageUrl };
+        updatedFields[index] = { ...updatedFields[index], value: response.data.url, tempImageUrl };
         setDynamicFields(updatedFields);
       } else {
-        setSelectedImage(tempImageUrl);
+        setImageUrl(response.data.url);
+        setSelectedImage(response.data.url); // Update selectedImage with server URL
       }
-
-      const formData = new FormData();
-      formData.append("file", file);
-
-      try {
-        const response = await axios.post("http://localhost:5000/api/upload", formData, {
-          headers: { "Content-Type": "multipart/form-data" },
-        });
-        if (index !== null) {
-          const updatedFields = [...dynamicFields];
-          updatedFields[index] = { ...updatedFields[index], value: response.data.url };
-          setDynamicFields(updatedFields);
-        } else {
-          setImageUrl(response.data.url);
-        }
-      } catch (error) {
-        console.error("Error uploading image:", error);
-        Swal.fire({
-          title: "Error!",
-          text: "Failed to upload image. Please try again.",
-          icon: "error",
-          confirmButtonColor: "#d33",
-          customClass: {
-            popup: "rounded-xl shadow-lg",
-            confirmButton: "px-4 py-2 rounded-full",
-          },
-        });
-      } finally {
-        setIsUploading(false);
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      Swal.fire({
+        title: "Error!",
+        text: error.message || "Failed to upload image. Please try again.",
+        icon: "error",
+        confirmButtonColor: "#d33",
+        customClass: {
+          popup: "rounded-xl shadow-lg",
+          confirmButton: "px-4 py-2 rounded-full",
+        },
+      });
+      // Revert temp image if upload fails
+      if (index !== null) {
+        const updatedFields = [...dynamicFields];
+        updatedFields[index] = { ...updatedFields[index], tempImageUrl: null };
+        setDynamicFields(updatedFields);
+      } else {
+        setSelectedImage(null);
       }
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -154,7 +186,7 @@ const ProjectDetailsForm = () => {
 
     let errors = [];
     if (!formData.title.trim()) errors.push("Please enter a non-empty project title.");
-    if (!imageUrl) errors.push("Please upload an image.");
+    if (!imageUrl) errors.push("Please upload a project image.");
     if (!formData.platform.trim()) errors.push("Please enter a platform.");
     if (!formData.category.trim()) errors.push("Please enter a category.");
     if (!formData.liveView.trim()) errors.push("Please enter a live view link.");
@@ -294,6 +326,10 @@ const ProjectDetailsForm = () => {
                 src={selectedImage}
                 alt="Preview"
                 className="max-h-64 object-contain mb-3 rounded-lg"
+                onError={() => {
+                  console.error("Error loading main image:", selectedImage);
+                  setSelectedImage(null); // Fallback if image fails to load
+                }}
               />
             ) : (
               <>
@@ -424,11 +460,17 @@ const ProjectDetailsForm = () => {
                     htmlFor={`dynamicImageUpload-${index}`}
                     className="w-full flex flex-col items-center justify-center border-2 border-dashed border-blue-400 rounded-lg p-8 cursor-pointer hover:border-blue-600 transition"
                   >
-                    {field.tempImageUrl ? (
+                    {field.tempImageUrl || field.value ? (
                       <img
-                        src={field.tempImageUrl}
+                        src={field.tempImageUrl || field.value}
                         alt={`Dynamic Preview ${index + 1}`}
                         className="max-h-64 object-contain mb-3 rounded-lg"
+                        onError={() => {
+                          console.error(`Error loading dynamic image ${index + 1}:`, field.tempImageUrl || field.value);
+                          const updatedFields = [...dynamicFields];
+                          updatedFields[index] = { ...updatedFields[index], tempImageUrl: null, value: "" };
+                          setDynamicFields(updatedFields);
+                        }}
                       />
                     ) : (
                       <>
@@ -497,7 +539,7 @@ const ProjectDetailsForm = () => {
               <button
                 type="button"
                 onClick={() => removeDynamicField(index)}
-                className="absolute top-0 right-0  text-red-500 p-2 rounded-full hover:bg-red-600 transition"
+                className="absolute top-0 right-0 text-red-500 p-2 rounded-full hover:bg-red-600 hover:text-white transition"
                 title="Remove Field"
               >
                 <svg
@@ -549,6 +591,7 @@ const ProjectDetailsForm = () => {
           <button
             type="submit"
             className="w-full bg-blue-600 text-white font-semibold py-3 rounded-lg hover:bg-blue-700 transition"
+            disabled={isUploading}
           >
             {isEditing ? "✅ Update" : "✅ Submit"}
           </button>
