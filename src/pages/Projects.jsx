@@ -1,6 +1,7 @@
 // src/components/PortfolioPage.js
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { Link } from "react-router-dom"; // Import Link for navigation
 
 const PortfolioPage = () => {
   const [projects, setProjects] = useState([]);
@@ -14,7 +15,8 @@ const PortfolioPage = () => {
         setLoading(true);
         const response = await axios.get("http://localhost:5000/api/projects");
 
-        const formattedProjects = response.data.map((project) => ({
+        const formattedProjects = response.data.map((project, index) => ({
+          id: index, // Add an ID for routing
           title: project.title || "Untitled Project",
           description: project.services
             ? `A project focused on ${project.category} with services including ${project.services}.`
@@ -127,7 +129,7 @@ const PortfolioPage = () => {
             {filteredProjects.length > 0 ? (
               filteredProjects.map((project, index) => (
                 <div
-                  key={index}
+                  key={project.id}
                   className={`flex w-full items-center ${
                     index % 2 === 0 ? "" : "flex-row-reverse"
                   }`}
@@ -160,12 +162,13 @@ const PortfolioPage = () => {
                       ))}
                     </div>
                     <div className="flex gap-6">
-                      <a
-                        href="#"
+                      <Link
+                        to={`/project/${project.id}`}
+                        state={{ project }} // Pass project data via state
                         className="bg-blue-600 text-white px-8 py-3 rounded-full hover:bg-blue-700 transition text-lg font-medium"
                       >
                         View Case Study
-                      </a>
+                      </Link>
                       <a
                         href={project.liveView}
                         target="_blank"

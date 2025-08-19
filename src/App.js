@@ -24,6 +24,8 @@ import EditForm from "./components/Blogs/EditForm";
 import { SidebarProvider } from "./SidebarContext";
 import ProjectDetailsForm from "./components/projects/ProjectDetailsForm";
 import ProjectDetailsPage from "./components/projects/ProjectDetailsPage";
+import PortfolioPage from "./pages/Projects"; // Import PortfolioPage
+import ProjectDetails from "./components/projects/ProjectDetails"; // Import ProjectDetails
 
 const Admin = lazy(() => import("./components/Blogs/Admin"));
 
@@ -57,7 +59,8 @@ const App = () => {
               <Route path="/about" element={<About />} />
               <Route path="/services" element={<GrowcodeServices />} />
               <Route path="/career" element={<Jobdata />} />
-              <Route path="/portfolio" element={<Projects />} />
+              <Route path="/portfolio" element={<PortfolioPage />} /> {/* Updated to PortfolioPage */}
+              <Route path="/project/:id" element={<ProjectDetails />} /> {/* Added ProjectDetails route */}
               <Route path="/blogs" element={<Blogs />} />
               <Route path="/blog/:id" element={<BlogDetail />} />
               <Route path="/contact" element={<Growcodecontact />} />
