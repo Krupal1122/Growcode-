@@ -91,17 +91,17 @@ const ProjectDetails = () => {
       <div className="bg-gray-50 p-6 rounded-xl shadow-sm">
         {/* Project Image */}
         {project.image && (
-          <div className="mb-8">
-            <img
-              src={project.image || "https://via.placeholder.com/600x400"}
-              alt={project.title || "Project"}
-              className="w-full h-96 object-cover rounded-xl shadow-lg"
-            />
-          </div>
+        <div className="mb-8 flex justify-center">
+  <img
+    src={project.image || "https://via.placeholder.com/600x400"}
+    alt={project.title || "Project"}
+    className="max-w-[100%] h-auto object-cover rounded-xl shadow-lg"
+  />
+</div>
         )}
 
         {/* Details Section */}
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-8 text-center">
+        <div className="flex grid-cols-1 md:grid-cols-5 gap-52 text-center">
           {/* Platform */}
           {project.platform && (
             <div>
@@ -149,42 +149,49 @@ const ProjectDetails = () => {
             </div>
           )}
         </div>
+        <hr className="my-8 border-gray-300" />
 
         {/* Dynamic Fields Section */}
         <div className="mt-8">
-          <h2 className="text-lg font-bold text-gray-800 mb-4">Additional Details</h2>
+          <h2 className="text-xl font-bold text-gray-800 mb-6 text-center">Project Highlights</h2>
           {dynamicFields.length > 0 ? (
-            <div className="grid grid-cols-1 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {dynamicFields.map((field, index) => {
-                console.log(`Rendering field ${index}:`, field); // Debug: Log each field
                 if (field.type === "image") {
                   return (
-                    <div key={index} className="mb-4">
+                    <div key={index} className="flex justify-center items-center col-span-2">
                       <img
                         src={field.value || "https://via.placeholder.com/600x400"}
                         alt={`Dynamic Image ${index + 1}`}
-                        className="w-full h-64 object-cover rounded-xl shadow-lg"
+                        className="w-full max-w-[500px] rounded-2xl shadow-lg object-cover"
+                        style={{ background: "#f5f7fa" }}
                       />
                     </div>
                   );
                 } else if (field.type === "title") {
+                  // Title on left half (col 1)
                   return (
-                    <h3 key={index} className="text-base font-semibold text-gray-800">
-                      {field.value || "N/A"}
-                    </h3>
+                    <div key={index} className="md:col-span-1 col-span-1 flex items-start">
+                      <h3 className="text-2xl font-bold text-gray-900 mb-2 text-left w-full">
+                        {field.value || "N/A"}
+                      </h3>
+                    </div>
                   );
                 } else if (field.type === "description") {
+                  // Description on right half (col 2)
                   return (
-                    <p key={index} className="text-sm text-gray-600">
-                      {field.value || "N/A"}
-                    </p>
+                    <div key={index} className="md:col-start-2 md:col-span-1 col-span-1 flex items-start">
+                      <p className="text-base text-gray-700 mb-4 text-left w-full">
+                        {field.value || "N/A"}
+                      </p>
+                    </div>
                   );
                 }
-                return null; // Skip unsupported types
+                return null;
               })}
             </div>
           ) : (
-            <p className="text-sm text-gray-600">No additional details available.</p> // Fallback message
+            <p className="text-base text-gray-500 text-center">No additional details available.</p>
           )}
         </div>
       </div>
@@ -192,9 +199,9 @@ const ProjectDetails = () => {
   };
 
   return (
-    <section className="min-h-screen bg-gradient-to-r from-purple-500 to-blue-400 py-12">
-      <div className="max-w-5xl mx-auto">
-        <h2 className="text-3xl font-bold text-white mb-6 text-center">
+    <section className="">
+      <div className="">
+        <h2 className="text-5xl font-bold  mb-6 text-center">
           {project.title || "Project Details"}
         </h2>
         {renderProjectDetails()}
