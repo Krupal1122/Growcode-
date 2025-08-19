@@ -1,35 +1,37 @@
-// src/components/ProjectDetails.js
 import React, { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import axios from "axios";
 
 const ProjectDetails = () => {
   const { id } = useParams(); // Get project ID from URL
+  console.log("Project ID from URL:", id); // Debug: Log ID
   const [project, setProject] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // Fetch project data
   useEffect(() => {
     const fetchProject = async () => {
       try {
         setLoading(true);
-        console.log("Fetching project with ID:", id); // Debug log
+        console.log("Fetching project with ID:", id);
 
         // Try fetching single project by ID
         let response;
         try {
           response = await axios.get(`http://localhost:5000/api/projects/${id}`);
-          console.log("API response:", response.data); // Debug log
+          console.log("Fetched project:", response.data); // Debug: Log fetched project
           setProject(response.data);
         } catch (err) {
           console.warn("Single project fetch failed, trying to fetch all projects:", err.message);
-          // Fallback: Fetch all projects and filter by ID
+          // Fallback: Fetch all projects and filter by _id
           response = await axios.get("http://localhost:5000/api/projects");
-          const project = response.data.find((p, index) => index === parseInt(id));
+          console.log("Fetched all projects:", response.data); // Debug: Log all projects
+          const project = response.data.find((p) => p._id === id);
           if (!project) {
             throw new Error("Project not found in fallback fetch");
           }
-          console.log("Fallback project found:", project); // Debug log
+          console.log("Found project in fallback:", project); // Debug: Log found project
           setProject(project);
         }
 
@@ -80,151 +82,122 @@ const ProjectDetails = () => {
     );
   }
 
-  // Custom rendering to match the full-screen image layout
+  // Render project details
   const renderProjectDetails = () => {
-    const excludeFields = ["_id", "__v"]; // Exclude MongoDB metadata
-    const details = Object.entries(project).filter(
-      ([key]) => !excludeFields.includes(key)
-    );
+    const dynamicFields = project.dynamicFields || [];
+    console.log("Rendering dynamicFields:", dynamicFields); // Debug: Log dynamicFields before rendering
 
     return (
       <div className="bg-gray-50 p-6 rounded-xl shadow-sm">
-      {/* Project Image */}
-      {details.find(([key]) => key.toLowerCase().includes("image")) && (
-        <div className="mb-8">
-          <img
-            src={
-              details.find(([key]) => key.toLowerCase().includes("image"))[1] ||
-              "https://via.placeholder.com/600x400"
-            }
-            alt={project.title || "Project"}
-            className="w-full h-full object-cover rounded-xl shadow-lg"
-          />
+        {/* Project Image */}
+        {project.image && (
+          <div className="mb-8">
+            <img
+              src={project.image || "https://via.placeholder.com/600x400"}
+              alt={project.title || "Project"}
+              className="w-full h-96 object-cover rounded-xl shadow-lg"
+            />
+          </div>
+        )}
+
+        {/* Details Section */}
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-8 text-center">
+          {/* Platform */}
+          {project.platform && (
+            <div>
+              <h3 className="text-xs uppercase text-gray-500 tracking-wide">Platform</h3>
+              <p className="mt-1 text-base font-semibold text-gray-800">{project.platform}</p>
+            </div>
+          )}
+
+          {/* Category */}
+          {project.category && (
+            <div>
+              <h3 className="text-xs uppercase text-gray-500 tracking-wide">Category</h3>
+              <p className="mt-1 text-base font-semibold text-gray-800">{project.category}</p>
+            </div>
+          )}
+
+          {/* Live View */}
+          {project.liveView && (
+            <div>
+              <h3 className="text-xs uppercase text-gray-500 tracking-wide">Live View</h3>
+              <a
+                href={project.liveView}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-1 text-base font-semibold text-blue-600 hover:underline"
+              >
+                {project.liveView}
+              </a>
+            </div>
+          )}
+
+          {/* Timelines */}
+          {project.timelines && (
+            <div>
+              <h3 className="text-xs uppercase text-gray-500 tracking-wide">Timelines</h3>
+              <p className="mt-1 text-base font-semibold text-gray-800">{project.timelines}</p>
+            </div>
+          )}
+
+          {/* Services Provided */}
+          {project.services && (
+            <div>
+              <h3 className="text-xs uppercase text-gray-500 tracking-wide">Service We Provided</h3>
+              <p className="mt-1 text-base font-semibold text-gray-800">{project.services}</p>
+            </div>
+          )}
         </div>
-      )}
 
-      {/* Details Section */}
-      <div className="flex grid-cols-1 md:grid-cols-5 gap-52 text-center">
-        {/* Platform */}
-        {details.find(([key]) => key.toLowerCase().includes("platform")) && (
-          <div>
-            <h3 className="text-xs uppercase text-gray-500 tracking-wide">
-              Platform
-            </h3>
-            <p className="mt-1 text-base font-semibold text-gray-800">
-              {details.find(([key]) =>
-                key.toLowerCase().includes("platform")
-              )[1] || "N/A"}
-            </p>
-          </div>
-        )}
-
-        {/* Category */}
-        {details.find(([key]) => key.toLowerCase().includes("category")) && (
-          <div>
-            <h3 className="text-xs uppercase text-gray-500 tracking-wide">
-              Category
-            </h3>
-            <p className="mt-1 text-base font-semibold text-gray-800">
-              {details.find(([key]) =>
-                key.toLowerCase().includes("category")
-              )[1] || "N/A"}
-            </p>
-          </div>
-        )}
-
-        {/* Live View */}
-        {details.find(
-          ([key]) =>
-            key.toLowerCase().includes("live") ||
-            key.toLowerCase().includes("view")
-        ) && (
-          <div>
-            <h3 className="text-xs uppercase text-gray-500 tracking-wide">
-              Live View
-            </h3>
-            <a
-              href={
-                details.find(
-                  ([key]) =>
-                    key.toLowerCase().includes("live") ||
-                    key.toLowerCase().includes("view")
-                )[1] || "#"
-              }
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-1 text-base font-semibold text-blue-600 hover:underline"
-            >
-              {details.find(
-                ([key]) =>
-                  key.toLowerCase().includes("live") ||
-                  key.toLowerCase().includes("view")
-              )[1] || "No link"}
-            </a>
-          </div>
-        )}
-
-        {/* Timelines */}
-        {details.find(([key]) => key.toLowerCase().includes("time")) && (
-          <div>
-            <h3 className="text-xs uppercase text-gray-500 tracking-wide">
-              Timelines
-            </h3>
-            <p className="mt-1 text-base font-semibold text-gray-800">
-              {details.find(([key]) =>
-                key.toLowerCase().includes("time")
-              )[1] || "N/A"}
-            </p>
-          </div>
-        )}
-
-        {/* Services Provided */}
-        {details.find(([key]) => key.toLowerCase().includes("service")) && (
-          <div>
-            <h3 className="text-xs uppercase text-gray-500 tracking-wide">
-              Service We Provided
-            </h3>
-            {Array.isArray(
-              details.find(([key]) => key.toLowerCase().includes("service"))[1]
-            ) ? (
-              <div className="flex flex-col items-center mt-1 space-y-1">
-                {details
-                  .find(([key]) => key.toLowerCase().includes("service"))[1]
-                  .map((item, index) => (
-                    <span
-                      key={index}
-                      className="bg-indigo-100 text-indigo-600 px-2 py-1 rounded-full text-xs font-medium"
-                    >
-                      {item}
-                    </span>
-                  ))}
-              </div>
-            ) : (
-              <p className="mt-1 text-base font-semibold text-gray-800">
-                {
-                  details.find(([key]) =>
-                    key.toLowerCase().includes("service")
-                  )[1]
+        {/* Dynamic Fields Section */}
+        <div className="mt-8">
+          <h2 className="text-lg font-bold text-gray-800 mb-4">Additional Details</h2>
+          {dynamicFields.length > 0 ? (
+            <div className="grid grid-cols-1 gap-4">
+              {dynamicFields.map((field, index) => {
+                console.log(`Rendering field ${index}:`, field); // Debug: Log each field
+                if (field.type === "image") {
+                  return (
+                    <div key={index} className="mb-4">
+                      <img
+                        src={field.value || "https://via.placeholder.com/600x400"}
+                        alt={`Dynamic Image ${index + 1}`}
+                        className="w-full h-64 object-cover rounded-xl shadow-lg"
+                      />
+                    </div>
+                  );
+                } else if (field.type === "title") {
+                  return (
+                    <h3 key={index} className="text-base font-semibold text-gray-800">
+                      {field.value || "N/A"}
+                    </h3>
+                  );
+                } else if (field.type === "description") {
+                  return (
+                    <p key={index} className="text-sm text-gray-600">
+                      {field.value || "N/A"}
+                    </p>
+                  );
                 }
-              </p>
-            )}
-          </div>
-        )}
+                return null; // Skip unsupported types
+              })}
+            </div>
+          ) : (
+            <p className="text-sm text-gray-600">No additional details available.</p> // Fallback message
+          )}
+        </div>
       </div>
-    </div>
     );
   };
 
   return (
-    <section className="">
-      <div className="">
-        
-        <div className="">
-          <h2 className="text-3xl font-bold text-gray-900 mb-6 text-center">
-            {project.title || "Project Details"}
-          </h2>
-          {renderProjectDetails()}
-        </div>
+    <section className="min-h-screen bg-gradient-to-r from-purple-500 to-blue-400 py-12">
+      <div className="max-w-5xl mx-auto">
+        <h2 className="text-3xl font-bold text-white mb-6 text-center">
+          {project.title || "Project Details"}
+        </h2>
+        {renderProjectDetails()}
       </div>
     </section>
   );

@@ -42,6 +42,7 @@ const ProjectDetailsForm = () => {
           tempImageUrl: field.type === "image" ? field.value : null,
         })) || []
       );
+      console.log("Initial dynamicFields:", location.state.project.dynamicFields); // Debug: Log initial dynamic fields
     }
   }, [location.state]);
 
@@ -54,11 +55,12 @@ const ProjectDetailsForm = () => {
     const updatedFields = [...dynamicFields];
     updatedFields[index] = { ...updatedFields[index], value };
     setDynamicFields(updatedFields);
+    console.log("Updated dynamicFields:", updatedFields); // Debug: Log dynamic fields after change
   };
 
   const handleImageChange = async (e, index = null) => {
     const file = e.target.files[0];
-    console.log("File selected:", file); // Debug: Check if file is selected
+    console.log("File selected:", file);
     if (!file) {
       Swal.fire({
         title: "No File Selected!",
@@ -89,7 +91,7 @@ const ProjectDetailsForm = () => {
 
     setIsUploading(true);
     const tempImageUrl = URL.createObjectURL(file);
-    console.log("Temp image URL:", tempImageUrl); // Debug: Check temp URL
+    console.log("Temp image URL:", tempImageUrl);
 
     if (index !== null) {
       const updatedFields = [...dynamicFields];
@@ -106,7 +108,7 @@ const ProjectDetailsForm = () => {
       const response = await axios.post("http://localhost:5000/api/upload", uploadFormData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-      console.log("Upload response:", response.data); // Debug: Check server response
+      console.log("Upload response:", response.data);
       if (!response.data.url) {
         throw new Error("No URL returned from server");
       }
@@ -114,9 +116,10 @@ const ProjectDetailsForm = () => {
         const updatedFields = [...dynamicFields];
         updatedFields[index] = { ...updatedFields[index], value: response.data.url, tempImageUrl };
         setDynamicFields(updatedFields);
+        console.log("Dynamic fields after image upload:", updatedFields); // Debug: Log after image upload
       } else {
         setImageUrl(response.data.url);
-        setSelectedImage(response.data.url); // Update selectedImage with server URL
+        setSelectedImage(response.data.url);
       }
     } catch (error) {
       console.error("Error uploading image:", error);
@@ -130,7 +133,6 @@ const ProjectDetailsForm = () => {
           confirmButton: "px-4 py-2 rounded-full",
         },
       });
-      // Revert temp image if upload fails
       if (index !== null) {
         const updatedFields = [...dynamicFields];
         updatedFields[index] = { ...updatedFields[index], tempImageUrl: null };
@@ -145,6 +147,7 @@ const ProjectDetailsForm = () => {
 
   const addDynamicField = (type) => {
     setDynamicFields([...dynamicFields, { type, value: "", tempImageUrl: null }]);
+    console.log("Added dynamic field, new dynamicFields:", [...dynamicFields, { type, value: "", tempImageUrl: null }]); // Debug: Log after adding field
   };
 
   const removeDynamicField = (index) => {
@@ -165,6 +168,7 @@ const ProjectDetailsForm = () => {
       if (result.isConfirmed) {
         const updatedFields = dynamicFields.filter((_, i) => i !== index);
         setDynamicFields(updatedFields);
+        console.log("Dynamic fields after removal:", updatedFields); // Debug: Log after removal
         Swal.fire({
           title: "Removed!",
           text: "The field has been removed.",
@@ -243,6 +247,7 @@ const ProjectDetailsForm = () => {
           value: field.value.trim ? field.value.trim() : field.value,
         })),
       };
+      console.log("Submitting payload:", payload); // Debug: Log payload before submission
 
       if (isEditing) {
         await axios.put(`http://localhost:5000/api/projects/${projectId}`, payload, {
@@ -328,7 +333,7 @@ const ProjectDetailsForm = () => {
                 className="max-h-64 object-contain mb-3 rounded-lg"
                 onError={() => {
                   console.error("Error loading main image:", selectedImage);
-                  setSelectedImage(null); // Fallback if image fails to load
+                  setSelectedImage(null);
                 }}
               />
             ) : (

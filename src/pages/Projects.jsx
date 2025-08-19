@@ -16,6 +16,7 @@ const PortfolioPage = () => {
         const response = await axios.get("http://localhost:5000/api/projects");
 
         const formattedProjects = response.data.map((project, index) => ({
+          ...project,
           id: index, // Add an ID for routing
           title: project.title || "Untitled Project",
           description: project.services
@@ -127,7 +128,9 @@ const PortfolioPage = () => {
         {!loading && !error && (
           <div className="space-y-20">
             {filteredProjects.length > 0 ? (
-              filteredProjects.map((project, index) => (
+              filteredProjects.map((project, index) => {
+                console.log(project,"gdiosnifm")
+                return(
                 <div
                   key={project.id}
                   className={`flex w-full items-center ${
@@ -163,7 +166,7 @@ const PortfolioPage = () => {
                     </div>
                     <div className="flex gap-6">
                       <Link
-                        to={`/project/${project.id}`}
+                        to={`/project/${project._id}`}
                         state={{ project }} // Pass project data via state
                         className="bg-blue-600 text-white px-8 py-3 rounded-full hover:bg-blue-700 transition text-lg font-medium"
                       >
@@ -180,7 +183,7 @@ const PortfolioPage = () => {
                     </div>
                   </div>
                 </div>
-              ))
+              )})
             ) : (
               <div className="text-center text-gray-500 text-xl py-12">
                 No projects found in this category.
